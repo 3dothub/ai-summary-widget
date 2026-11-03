@@ -1515,6 +1515,7 @@
       scenarioType: scenario.scenario_type || "GENERAL_CHANGE",
       actionSubtype: actionSubtype,
       productGroups: buildProductGroups(ai, actionSubtype),
+      recordChanges: (ai.summary_details && ai.summary_details.record_changes) || ai.record_changes || [],
       scenarioTitle: scenario.display_title || "Order Summary",
       scenarioSubtitle: scenarioSubtitle,
       serviceAddress: serviceAddress,

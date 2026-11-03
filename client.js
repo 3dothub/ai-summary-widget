@@ -319,6 +319,24 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             title: "Services on Account",
             cards: NO_CARDS,
         },
+        RECORD_CHANGE: {
+            title: "Requested Services",
+            compare: true,
+            cards: function(o) {
+                var changes = changedRecords(o);
+                function side(label, key, tone) {
+                    return {
+                        label: changes.length === 1 ? label + " " + changes[0].label : label,
+                        multiLabel: label,
+                        lines: changes.map(function(ch) {
+                            return { label: ch.label, value: { text: ch[key] || "" }, font: "compact", optional: true };
+                        }),
+                        tone: tone,
+                    };
+                }
+                return [side("Existing", "existing_value", "from"), side("Requested", "requested_value", "to")];
+            },
+        },
         DEFAULT: {
             title: "Requested Services",
             cards: NO_CARDS,
@@ -460,6 +478,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         { profile: "SERVICE_CHANGE", when: ["isServiceChange"] },
         { profile: "SPEED_CHANGE", when: ["isSpeedChange"] },
         { profile: "TN_CHANGE", when: ["isTnChange", "!isDisconnect"] },
+        { profile: "RECORD_CHANGE", when: ["hasRecordChanges"] },
         { profile: "CANCELLATION", when: ["isCanceled"] },
         // Disconnects are checked before New Install: the 622 payload can set
         // has_tech_install on any order type.
@@ -490,6 +509,9 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         isSpeedChange: function(o, sc) {
             return o.scenarioType === "SPEED_CHANGE" || sc.is_speed_change === true;
+        },
+        hasRecordChanges: function(o) {
+            return changedRecords(o).length > 0;
         },
         isTnChange: function(o, sc) {
             return o.scenarioType === "TN_CHANGE" || sc.is_tn_change === true;
@@ -690,6 +712,13 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return c.actionKey();
     }
 
+    function changedRecords(o) {
+        return (o.recordChanges || []).filter(function(ch) {
+            return ch && ch.changed !== false && hasValue(ch.label) &&
+                (hasValue(ch.existing_value) || hasValue(ch.requested_value));
+        });
+    }
+
     function buildCards(o) {
         if (!o) return null;
         var sc = o.scenario || {};
@@ -700,7 +729,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 return buildTile(card, o, sc);
             });
         };
-        var tiles = build(profile.cards);
+        var tiles = build(angular.isFunction(profile.cards) ? profile.cards(o, sc) : profile.cards);
         var usedFallback = false;
         var anyMissing = tiles.some(function(t) {
             return t.missing;
