@@ -1,0 +1,373 @@
+<div class="aisw-rail" ng-if="c.state.collapsed">
+  <button
+          type="button"
+          class="aisw-summary-toggle-btn"
+          ng-click="c.togglePanel()"
+          aria-label="Show AI Summary"
+          title="{{c.state.loading ? 'Loading summary...' : 'Show AI Summary'}}"
+          >
+    <span class="aisw-toggle-icon">&#10022;</span>
+    <span class="aisw-toggle-label">AI Summary</span>
+  </button>
+</div>
+<!-- Sliding Side Panel Widget -->
+<div class="ai-summary-widget" ng-class="{'is-collapsed': c.state.collapsed}">
+  <!-- Attached Tab on Panel Left Edge -->
+  <button
+          type="button"
+          class="aisw-summary-toggle-btn aisw-attached-tab"
+          ng-click="c.togglePanel()"
+          aria-label="Hide AI Summary"
+          title="Hide AI Summary"
+          >
+    <span class="aisw-toggle-icon">&#10022;</span>
+    <span class="aisw-toggle-label">AI Summary</span>
+  </button>
+  <div class="aisw-panel">
+    <!-- ================= Top Header Bar (Warm Golden AI Bar) ================= -->
+    <div class="aisw-header">
+      <span class="aisw-header-sparkle">&#10022;</span>
+      <div class="aisw-header-text">
+        <div class="aisw-header-title">
+          AI Order Summary
+          <span class="aisw-header-order-badge" ng-if="c.data.order.orderNo"
+                >{{c.data.order.orderNo}}</span
+            >
+        </div>
+      </div>
+      <div class="aisw-header-actions">
+        <button
+                type="button"
+                class="aisw-icon-btn"
+                ng-click="c.refreshSummary()"
+                ng-disabled="c.state.loading"
+                title="Refresh summary"
+                aria-label="Refresh summary"
+                >
+          <span
+                class="aisw-btn-icon"
+                ng-class="{'is-spinning': c.state.loading}"
+                ng-bind-html="c.icon('refresh')"
+                ></span>
+        </button>
+        <button
+                type="button"
+                class="aisw-icon-btn"
+                ng-click="c.togglePanel()"
+                ng-disabled="c.state.loading"
+                title="Close summary"
+                aria-label="Close summary"
+                >
+          <span class="aisw-btn-icon" ng-bind-html="c.icon('cancel')"></span>
+        </button>
+      </div>
+    </div>
+    <!-- ================= Panel Scrollable Body ================= -->
+    <div class="aisw-content">
+      <!-- Error State Alert -->
+      <div
+           class="aisw-callout tone-danger"
+           ng-if="!c.state.loading && !c.data.order && c.data.errorMessage"
+           >
+        <span
+              class="aisw-callout-icon"
+              ng-bind-html="c.icon('alert-circle')"
+              ></span>
+        <div class="aisw-callout-body">
+          <div class="aisw-callout-title">Summary unavailable</div>
+          <div class="aisw-callout-text">{{c.data.errorMessage}}</div>
+        </div>
+      </div>
+      <!-- Skeleton (first load + refresh). Reuses the real card classes so sizes match the loaded view. -->
+      <div class="aisw-skeleton" ng-if="c.isLoadingView()" role="status" aria-live="polite" aria-busy="true">
+        <!-- 1. Scenario card -->
+        <div class="aisw-scenario-card">
+          <div class="aisw-skel-row aisw-skel-head">
+            <span class="aisw-skel aisw-skel-title"></span>
+            <span class="aisw-skel aisw-skel-pill"></span>
+            <span class="aisw-skel aisw-skel-pill aisw-skel-pill-sm"></span>
+          </div>
+          <span class="aisw-skel aisw-skel-line w-70"></span>
+          <div class="aisw-tiles-row">
+            <div class="aisw-tile tile-from">
+              <span class="aisw-skel aisw-skel-label"></span>
+              <span class="aisw-skel aisw-skel-value"></span>
+            </div>
+            <div class="aisw-tile-arrow-bubble">&rarr;</div>
+            <div class="aisw-tile tile-to">
+              <span class="aisw-skel aisw-skel-label"></span>
+              <span class="aisw-skel aisw-skel-value"></span>
+            </div>
+          </div>
+          <span class="aisw-skel aisw-skel-line w-100"></span>
+          <span class="aisw-skel aisw-skel-line w-95"></span>
+          <span class="aisw-skel aisw-skel-line w-60"></span>
+        </div>
+        <!-- 2. Service address -->
+        <div class="aisw-banner">
+          <span class="aisw-skel aisw-skel-line w-30"></span>
+          <span class="aisw-skel aisw-skel-line w-55"></span>
+        </div>
+        <!-- 3. Products -->
+        <div class="aisw-products-section">
+          <span class="aisw-skel aisw-skel-heading"></span>
+          <div class="aisw-prod-card prod-card-requested">
+            <div class="aisw-prod-card-header">
+              <span class="aisw-skel aisw-skel-line w-40"></span>
+              <span class="aisw-skel aisw-skel-pill aisw-skel-pill-sm"></span>
+            </div>
+            <div class="aisw-prod-list">
+              <div class="aisw-prod-row" ng-repeat="n in [1, 2] track by $index">
+                <span class="aisw-skel aisw-skel-icon"></span>
+                <span class="aisw-skel aisw-skel-line" ng-class="$first ? 'w-60' : 'w-45'"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- 4. Next action -->
+        <div class="aisw-card-section">
+          <div class="aisw-section-header-row">
+            <span class="aisw-skel aisw-skel-heading"></span>
+            <span class="aisw-skel aisw-skel-pill"></span>
+          </div>
+          <div class="action-directive-card">
+            <div class="aisw-skel-row">
+              <span class="aisw-skel aisw-skel-circle"></span>
+              <span class="aisw-skel aisw-skel-line w-55"></span>
+            </div>
+            <span class="aisw-skel aisw-skel-line w-100"></span>
+            <span class="aisw-skel aisw-skel-line w-70"></span>
+          </div>
+        </div>
+      </div>
+      <!-- Main Order View (Rendered when data arrives) -->
+      <div ng-if="c.data.order && !c.isLoadingView()">
+        <!-- ================= 1. Dynamic Scenario Callout Card ================= -->
+        <div class="aisw-scenario-card">
+          <div class="aisw-scenario-header" ng-class="{'aisw-long-title': (c.data.order.scenarioTitle || '').length > 18}">
+            <h4 class="aisw-scenario-title">{{c.data.order.scenarioTitle}}</h4>
+            <div class="aisw-header-right">
+              <span class="aisw-due-date-chip" ng-if="c.data.order.dueDate">
+                <span class="aisw-due-date-icon" aria-hidden="true">&#128197;</span>
+                <span>Due: {{c.data.order.dueDate}}</span>
+              </span>
+              <!-- RESTORED: health status badge -->
+              <span class="aisw-status-badge" ng-class="'badge-' + c.healthBadge().tone">
+                <span class="aisw-status-dot" ng-class="'dot-' + c.healthBadge().tone"></span>
+                {{c.healthBadge().text}}
+              </span>
+            </div>
+          </div>
+          <p class="aisw-scenario-subtitle">
+            {{c.data.order.scenarioSubtitle}}
+          </p>
+          <!-- Dedicated Order Health Callout for On Hold Orders -->
+          <div class="aisw-health-callout aisw-health-risk" ng-if="c.isOnHold() && c.getOnHoldReason()">
+            <div class="aisw-health-reason">
+              <strong>Reason:</strong> {{c.getOnHoldReason()}}
+            </div>
+          </div>
+          <!-- Dedicated Cancellation Details Card for Canceled Orders -->
+          <div class="aisw-cancellation-card" ng-if="c.isCanceled() && c.hasCancellationDetails()">
+            <div class="aisw-cancellation-grid">
+              <div class="aisw-cancellation-item" ng-if="c.getCancellationDetail('canceled_on')">
+                <span class="aisw-cancellation-label">Canceled On</span>
+                <span class="aisw-cancellation-val">{{c.getCancellationDetail('canceled_on')}}</span>
+              </div>
+              <div class="aisw-cancellation-item" ng-if="c.getCancellationDetail('canceled_by')">
+                <span class="aisw-cancellation-label">Canceled By</span>
+                <span class="aisw-cancellation-val">{{c.getCancellationDetail('canceled_by')}}</span>
+              </div>
+              <div class="aisw-cancellation-item" ng-if="c.getCancellationDetail('cancellation_reason')">
+                <span class="aisw-cancellation-label">Cancellation Reason</span>
+                <span class="aisw-cancellation-val">{{c.getCancellationDetail('cancellation_reason')}}</span>
+              </div>
+              <div class="aisw-cancellation-item" ng-if="c.getCancellationDetail('channel')">
+                <span class="aisw-cancellation-label">Channel</span>
+                <span class="aisw-cancellation-val">{{c.getCancellationDetail('channel')}}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Existing -> Requested cards. Cards per order action come from ACTION_PROFILES in client.js. -->
+          <div class="aisw-tiles-row" ng-if="c.cards" ng-class="{'aisw-tiles-single': c.cards.single}" data-case="{{c.cards.caseId}}">
+            <div ng-repeat-start="t in c.cards.tiles track by $index"
+                 class="aisw-tile" ng-class="'tile-' + t.tone">
+              <span class="aisw-tile-label">{{t.label}}</span>
+              <div class="aisw-tile-value" ng-if="!t.lines" ng-class="t.font ? 'font-' + t.font : ''">{{t.value}}</div>
+              <!-- Several values changing together (e.g. speed + TN): same size for every line -->
+              <div class="aisw-tile-lines" ng-if="t.lines">
+                <div class="aisw-tile-line" ng-repeat="l in t.lines track by $index">
+                  <span class="aisw-tile-line-label">{{l.label}}</span>
+                  <span class="aisw-tile-value font-line">{{l.value}}</span>
+                </div>
+              </div>
+              <span class="aisw-tile-sub" ng-if="t.sub">{{t.sub}}</span>
+            </div>
+            <div ng-repeat-end class="aisw-tile-arrow-bubble" ng-if="c.cards.arrow && !$last">&rarr;</div>
+          </div>
+          <!-- Narrative Paragraph -->
+          <p
+             class="aisw-scenario-narrative"
+             ng-bind-html="c.formattedSummary()"
+             ></p>
+        </div>
+        <!-- ================= 2. Service Address Banner ================= -->
+        <div class="aisw-banner" ng-if="c.data.order.serviceAddress">
+          <span class="aisw-banner-icon" aria-hidden="true">&#128205;</span>
+          <span class="aisw-banner-label">Service Address:</span>
+          <span class="aisw-banner-text">{{c.data.order.serviceAddress}}</span>
+        </div>
+        <!-- ================= 3. Products in Order ================= -->
+        <div class="aisw-products-section" ng-if="c.hasProducts()">
+          <h5 class="aisw-section-heading">Products in Order</h5>
+          <!-- Existing / Outgoing Services -->
+          <div
+               class="aisw-prod-card prod-card-existing"
+               ng-if="c.existingProducts().length > 0"
+               >
+            <div class="aisw-prod-card-header">
+              <span class="aisw-prod-card-title">{{c.existingTitle()}}</span>
+              <!-- RESTORED: existing status badge (from API) -->
+              <span class="aisw-prod-badge aisw-existing-status" ng-if="c.existingBadge().text" ng-class="'badge-' + c.existingBadge().tone"
+                    >{{(c.existingBadge().text || "").toUpperCase()}}</span
+                >
+            </div>
+            <div class="aisw-prod-list">
+              <div class="aisw-prod-row" ng-repeat="p in c.existingProducts() track by $index">
+                <span
+                      class="aisw-prod-icon-badge"
+                      ng-class="c.productBadgeClass(p)"
+                      ng-bind-html="c.productIcon(p)"
+                      ></span>
+                <span class="aisw-prod-name">{{p}}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Requested Services (title + badge vary by order action) -->
+          <div
+               class="aisw-prod-card prod-card-requested"
+               ng-if="c.requestedProducts().length > 0"
+               >
+            <div class="aisw-prod-card-header">
+              <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
+              <!-- RESTORED: requested status badge (from API) -->
+              <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
+                    >{{(c.requestedBadge().text || "").toUpperCase()}}</span
+                >
+            </div>
+            <div class="aisw-prod-list">
+              <div class="aisw-prod-row" ng-repeat="p in c.requestedProducts() track by $index">
+                <span
+                      class="aisw-prod-icon-badge"
+                      ng-class="c.productBadgeClass(p)"
+                      ng-bind-html="c.productIcon(p)"
+                      ></span>
+                <span class="aisw-prod-name">{{p}}</span>
+              </div>
+            </div>
+          </div>
+          <!-- Fallback: Services on Order -->
+          <div
+               class="aisw-prod-card prod-card-requested"
+               ng-if="c.existingProducts().length === 0 && c.requestedProducts().length === 0 && c.otherOrderProducts().length > 0"
+               >
+            <div class="aisw-prod-card-header">
+              <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
+              <!-- RESTORED: fallback badge -->
+              <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
+                    >{{(c.requestedBadge().text || "").toUpperCase()}}</span
+                >
+            </div>
+            <div class="aisw-prod-list">
+              <div class="aisw-prod-row" ng-repeat="p in c.otherOrderProducts() track by $index">
+                <span
+                      class="aisw-prod-icon-badge"
+                      ng-class="c.productBadgeClass(p)"
+                      ng-bind-html="c.productIcon(p)"
+                      ></span>
+                <span class="aisw-prod-name">{{p}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ================= 4. Ownership & Operational Routing ================= -->
+        <div
+             class="aisw-card-section"
+             ng-if="c.data.order.caseOwnership && c.data.order.caseOwnership.length > 0"
+             >
+          <h5 class="aisw-section-heading">Ownership &amp; Operational Routing</h5>
+          <div
+               class="aisw-case-row"
+               ng-repeat="item in c.data.order.caseOwnership track by $index"
+               >
+            <div class="aisw-case-left">
+              <div class="aisw-case-title">
+                <span ng-if="item.isRouting">Routing &middot; </span>
+                <span ng-if="!item.isRouting">Case &middot; </span>
+                <span class="aisw-link" ng-if="item.case_sys_id" ng-click="c.openCase(item)"
+                      >{{item.case_number}}</span
+                  >
+                <span class="font-semibold" ng-if="!item.case_sys_id">{{item.case_number}}</span>
+              </div>
+              <div class="aisw-case-subtext">
+                {{item.assignment_group || 'Unassigned'}} &middot;
+                {{item.task_name || item.assigned_to || 'Assigned'}}
+              </div>
+            </div>
+            <div class="aisw-case-right">{{item.assignment_group || 'Unassigned'}}</div>
+          </div>
+        </div>
+        <!-- RESTORED: Completed orders fulfillment card -->
+        <div class="aisw-card-section aisw-completed-fulfillment" ng-if="c.isCompleted()">
+          <div class="aisw-section-header-row">
+            <h5 class="aisw-section-heading">Order Fulfillment Status</h5>
+            <span class="aisw-directive-pill aisw-completed-pill">COMPLETED &middot; CLOSED</span>
+          </div>
+          <div class="aisw-completed-card">
+            <span class="aisw-completed-check" aria-hidden="true">&#10003;</span>
+            <div class="aisw-completed-content">
+              <div class="aisw-completed-kicker">ORDER FULFILLMENT COMPLETED</div>
+              <div class="aisw-completed-message">Order completed successfully! All provisioning and activation tasks finished.</div>
+              <div class="aisw-completed-footer">
+                <span class="aisw-completed-status-label">Status:</span>
+                <span class="aisw-completed-status-chip">&#10003; All fulfillment tasks closed complete</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ================= 5. Next Actions ================= -->
+        <div
+             class="aisw-card-section"
+             ng-if="!c.isCompleted() && c.data.order.criticalNextActions && c.data.order.criticalNextActions.length > 0"
+             >
+          <div class="aisw-section-header-row">
+            <h5 class="aisw-section-heading">{{ c.nextActionHeading() }}</h5>
+            <span
+                  class="aisw-directive-pill"
+                  ng-class="c.actionPill(c.data.order.criticalNextActions[0]).cls"
+                  >{{ c.actionPill(c.data.order.criticalNextActions[0]).text }}</span
+              >
+          </div>
+          <div
+               class="action-directive-card"
+               ng-repeat="act in c.data.order.criticalNextActions track by $index"
+               ng-class="'theme-' + c.actionTheme(act)"
+               >
+            <div class="directive-head">
+              <div class="directive-icon-circle" ng-bind-html="c.actionIcon(act)"></div>
+              <div class="directive-title">{{ act.title || act.instruction }}</div>
+            </div>
+            <div class="directive-instruction" ng-if="act.title">{{ act.instruction }}</div>
+            <!-- RESTORED: owner when action required, status otherwise -->
+            <div class="directive-footer">
+              <span class="directive-meta-label" ng-if="!c.isCompleted() && act.action_required">Action Owner:</span>
+              <span class="directive-owner-chip" ng-if="!c.isCompleted() && act.action_required">
+                <span class="directive-owner-icon">&#128100;</span>{{ c.responsibleParty(act) }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
