@@ -1745,9 +1745,16 @@
   .aisw-tile-value.font-compact {
     font-size: 13px !important;
   }
+  .aisw-tile-lines .aisw-tile-line {
+    align-items: flex-start !important;
+  }
   .aisw-tile-lines .aisw-tile-value.font-line {
     font-size: 13px !important;
     font-weight: 800 !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
   }
   .aisw-tile-lines .aisw-tile-line-label {
     font-size: 10px !important;
