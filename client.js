@@ -920,16 +920,17 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             cls: cls
         };
         if (c.isCompleted()) return {
-            text: "COMPLETED · CLOSED",
+            text: "Completed · Closed",
             cls: cls
         };
         if (c.isActionCompleted(act)) return {
-            text: "COMPLETED",
+            text: "Completed",
             cls: cls
         };
-        var pr = ((act && act.priority) || "").toUpperCase();
+        var pr = ((act && act.priority) || "").toLowerCase();
+        pr = pr ? pr.charAt(0).toUpperCase() + pr.slice(1) : "";
         return {
-            text: "ACTION REQUIRED" + (pr ? " · " + pr : ""),
+            text: "Action required" + (pr ? " · " + pr : ""),
             cls: cls
         };
     };
@@ -956,16 +957,16 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return c.actionIcon(act);
     };
     c.actionDirectiveKicker = function(act) {
-        if (c.isCompleted()) return "ORDER FULFILLMENT COMPLETED";
-        if (c.isActionCompleted(act)) return "OPERATIONAL EXECUTION DIRECTIVE";
+        if (c.isCompleted()) return "Order fulfillment completed";
+        if (c.isActionCompleted(act)) return "Operational execution directive";
         var o = c.data.order || {};
         if (o.phase === "error" || o.falloutRecordCount > 0) {
-            return "CRITICAL FALLOUT RECOVERY DIRECTIVE";
+            return "Critical fallout recovery directive";
         }
         if (act && act.action_type === "resolve_dependency") {
-            return "DEPENDENCY RESOLUTION DIRECTIVE";
+            return "Dependency resolution directive";
         }
-        return "OPERATIONAL ACTION DIRECTIVE";
+        return "Operational action directive";
     };
     // ---------------- Summary narrative ----------------
     function escapeHtml(str) {

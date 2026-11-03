@@ -430,8 +430,8 @@
         color: #ffffff;
         font-size: 11px;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        text-transform: none;
+        letter-spacing: 0;
         border-radius: 4px;
       }
       .aisw-cancellation-title {
@@ -456,8 +456,8 @@
       .aisw-cancellation-label {
         font-size: 11px;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        text-transform: none;
+        letter-spacing: 0;
         color: #a0aec0;
       }
       .aisw-cancellation-val {
@@ -794,10 +794,10 @@
     .prod-card-existing .aisw-prod-badge.aisw-existing-status {
       color: #9f1239;
       background: #fecdd3;
-      text-transform: uppercase;
+      text-transform: none;
     }
     .aisw-prod-badge {
-      text-transform: uppercase;
+      text-transform: none;
     }
     .aisw-prod-list {
       display: flex;
@@ -979,10 +979,10 @@
   .aisw-directive-pill {
     font-size: 10px;
     font-weight: 800;
-    letter-spacing: 0.05em;
+    letter-spacing: 0;
     padding: 2.5px 8px;
     border-radius: 9999px;
-    text-transform: uppercase;
+    text-transform: none;
     white-space: nowrap;
   }
   .directive-pill-auto {

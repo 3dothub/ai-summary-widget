@@ -229,7 +229,7 @@
               <span class="aisw-prod-card-title">{{c.existingTitle()}}</span>
               <!-- RESTORED: existing status badge (from API) -->
               <span class="aisw-prod-badge aisw-existing-status" ng-if="c.existingBadge().text" ng-class="'badge-' + c.existingBadge().tone"
-                    >{{(c.existingBadge().text || "").toUpperCase()}}</span
+                    >{{c.existingBadge().text}}</span
                 >
             </div>
             <div class="aisw-prod-list">
@@ -252,7 +252,7 @@
               <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
               <!-- RESTORED: requested status badge (from API) -->
               <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
-                    >{{(c.requestedBadge().text || "").toUpperCase()}}</span
+                    >{{c.requestedBadge().text}}</span
                 >
             </div>
             <div class="aisw-prod-list">
@@ -275,7 +275,7 @@
               <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
               <!-- RESTORED: fallback badge -->
               <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
-                    >{{(c.requestedBadge().text || "").toUpperCase()}}</span
+                    >{{c.requestedBadge().text}}</span
                 >
             </div>
             <div class="aisw-prod-list">
@@ -326,7 +326,7 @@
           <div class="aisw-completed-card">
             <span class="aisw-completed-check" aria-hidden="true">&#10003;</span>
             <div class="aisw-completed-content">
-              <div class="aisw-completed-kicker">ORDER FULFILLMENT COMPLETED</div>
+              <div class="aisw-completed-kicker">Order fulfillment completed</div>
               <div class="aisw-completed-message">Order completed successfully! All provisioning and activation tasks finished.</div>
               <div class="aisw-completed-footer">
                 <span class="aisw-completed-status-label">Status:</span>
