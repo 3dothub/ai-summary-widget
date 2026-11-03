@@ -750,7 +750,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             // Arrow only for a real Existing -> Requested pair, never for fallback info tiles
             arrow: profile.compare === true && !usedFallback && tiles.length === 2,
             // One full-width card (e.g. Service to Disconnect)
-            single: tiles.length === 1,
+            single: profile.single === true && tiles.length === 1,
         };
     }
 
