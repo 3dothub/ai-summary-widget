@@ -1264,7 +1264,7 @@
   .ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center !important;
+    align-items: start !important;
     column-gap: 7px;
     row-gap: 5px;
     margin-bottom: 10px;
@@ -1334,32 +1334,6 @@
     overflow-wrap: anywhere !important;
     word-break: normal !important;
     white-space: normal !important;
-  }
-  /* FIX: Long scenario names get their own full-width line.
-    Short names (Speed Change) retain inline Due and Good badges. */
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-header.aisw-long-title {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: auto auto;
-    align-items: start !important;
-    row-gap: 8px !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-header.aisw-long-title > .aisw-scenario-title {
-    grid-column: 1;
-    grid-row: 1;
-    width: 100%;
-    max-width: none;
-    min-width: 0;
-    margin: 0;
-    white-space: normal !important;
-    overflow-wrap: break-word;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-header.aisw-long-title > .aisw-header-right {
-    grid-column: 1;
-    grid-row: 2;
-    justify-content: flex-end !important;
-    width: 100%;
-    min-width: 0;
   }
   /* Shared content-driven layout for ALL order scenarios. */
   .ai-summary-widget .aisw-scenario-card .aisw-tiles-row {

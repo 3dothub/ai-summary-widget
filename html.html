@@ -144,7 +144,7 @@
       <div ng-if="c.data.order && !c.isLoadingView()">
         <!-- ================= 1. Dynamic Scenario Callout Card ================= -->
         <div class="aisw-scenario-card">
-          <div class="aisw-scenario-header" ng-class="{'aisw-long-title': (c.data.order.scenarioTitle || '').length > 18}">
+          <div class="aisw-scenario-header">
             <h4 class="aisw-scenario-title">{{c.data.order.scenarioTitle}}</h4>
             <div class="aisw-header-right">
               <span class="aisw-due-date-chip" ng-if="c.data.order.dueDate">

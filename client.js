@@ -168,6 +168,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             cards: [
                 { label: "Requested TN", value: TN_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
                 { label: "Requested Speed", value: SPEED_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
+                { label: "Service ID", value: "service_instance_id", font: "tn", tone: tone, optional: true, hideEmpty: true },
             ],
         };
     }

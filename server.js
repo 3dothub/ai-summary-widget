@@ -1501,6 +1501,10 @@
       summaryText =
         "Order " + (orderNumber || "") + " completed successfully. All automated provisioning and activation steps finished.";
     }
+    scenario.service_instance_id =
+      scenario.service_instance_id ||
+      findField(inputOrdData, ["service_instance_id", "Service Instance ID"]) ||
+      "";
     return {
       orderNo:
         orderNumber ||
