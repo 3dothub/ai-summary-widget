@@ -167,7 +167,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             title: title,
             cards: [
                 { label: "Requested TN", value: TN_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
-                { label: "Requested Speed", value: SPEED_TO, tone: tone, optional: true, hideEmpty: true },
+                { label: "Requested Speed", value: SPEED_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
             ],
         };
     }
@@ -312,7 +312,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         DISCONNECT: disconnectProfile("Services to Disconnect", "Service to Disconnect"),
         PORT_OUT: disconnectProfile("Services to Port Out", "Service to Port Out"),
         SUSPEND: serviceStatusProfile("Suspended Services", "disco"),
-        PAUSE: serviceStatusProfile("Paused Services", "amber"),
+        PAUSE: serviceStatusProfile("Paused Services", "to"),
         RESTORE: serviceStatusProfile("Restored Services", "to"),
         RESUME: serviceStatusProfile("Resumed Services", "to"),
         MOVE: moveProfile("Services at New Address"),
