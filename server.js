@@ -1205,7 +1205,8 @@
     }
     // Preserve requested service details for suspend/restore/resume actions.
     // Values are sourced from the current order; no speed conversions.
-    if (scenario.scenario_type === "SUSPEND" || scenario.scenario_type === "RESTORE" || scenario.scenario_type === "RESUME") {
+    if (scenario.scenario_type === "SUSPEND" || scenario.scenario_type === "RESTORE" || scenario.scenario_type === "RESUME" ||
+        scenario.scenario_type === "BILLING_ONLY") {
       if (currentRequestedTn) {
         scenario.to_tn = currentRequestedTn;
         scenario.requested_tn = currentRequestedTn;
