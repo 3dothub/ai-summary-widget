@@ -237,6 +237,28 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             ],
             fallBackCards: [{ label: "Requested Speed", value: SPEED_TO, sub: "to_technology", tone: "to" }],
         },
+        SERVICE_CHANGE: {
+            title: "Requested Services",
+            compare: true,
+            cards: [{
+                    label: "Existing",
+                    lines: [
+                        { label: "Speed", value: SPEED_FROM },
+                        { label: "TN", value: TN_FROM, font: "tn", optional: true },
+                    ],
+                },
+                {
+                    label: "Requested",
+                    lines: [
+                        { label: "Speed", value: SPEED_TO },
+                        { label: "TN", value: TN_TO, font: "tn", optional: true },
+                    ],
+                    sub: "to_technology",
+                    tone: "to",
+                },
+            ],
+            fallBackCards: [{ label: "Requested Speed", value: SPEED_TO, sub: "to_technology", tone: "to" }],
+        },
         TN_CHANGE: {
             title: "Requested Services",
             compare: true,
@@ -435,6 +457,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     // No match -> the order's own action profile (c.actionKey()).
     var PROFILE_RULES = [
         { profile: "MIGRATION", when: ["isMigration"] },
+        { profile: "SERVICE_CHANGE", when: ["isServiceChange"] },
         { profile: "SPEED_CHANGE", when: ["isSpeedChange"] },
         { profile: "TN_CHANGE", when: ["isTnChange", "!isDisconnect"] },
         { profile: "CANCELLATION", when: ["isCanceled"] },
@@ -461,6 +484,9 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         isMigration: function(o, sc) {
             return o.scenarioType === "MIGRATION" || sc.is_migration === true;
+        },
+        isServiceChange: function(o, sc) {
+            return o.scenarioType === "SERVICE_CHANGE" || sc.is_speed_and_tn_change === true;
         },
         isSpeedChange: function(o, sc) {
             return o.scenarioType === "SPEED_CHANGE" || sc.is_speed_change === true;

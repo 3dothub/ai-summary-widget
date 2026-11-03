@@ -958,6 +958,7 @@
       !isMigrationOrder &&
       ((existingSpeedVal && currentRequestedSpeed && existingSpeedVal !== currentRequestedSpeed) ||
         scenario.scenario_type === "SPEED_CHANGE" ||
+        scenario.scenario_type === "SERVICE_CHANGE" ||
         scenario.is_speed_change);
     var isVoiceModifyTnOrder =
       isChangeAction &&
@@ -1018,6 +1019,7 @@
         orderAction === "billing only" ||
         orderAction === "billing_only" ||
         orderAction.indexOf("billing only") > -1);
+    scenario.is_speed_and_tn_change = false;
     // STEP 1: u_order_type takes precedence when populated
     if (hasSpecificUOrderType) {
       var uotLow = formattedOrderType.toLowerCase();
@@ -1090,6 +1092,11 @@
         scenario.to_tn = currentRequestedTn || null;
         scenario.requested_tn = currentRequestedTn || null;
         scenario.is_tn_change = true;
+        if (scenario.from_speed && scenario.to_speed && scenario.from_speed !== scenario.to_speed) {
+          scenario.scenario_type = "SERVICE_CHANGE";
+          scenario.display_title = "Service Change";
+          scenario.is_speed_and_tn_change = true;
+        }
       }
     } else if (isTnChangeOrder) {
       scenario.scenario_type = "TN_CHANGE";
@@ -1999,7 +2006,7 @@
             if (!isActiveService(gr)) continue;
             candidates.push({
               speed: String(gr.getValue("u_speed") || ""),
-              tn: String(gr.getValue("u_assigned_tn") || ""),
+              tn: String(gr.getValue("u_assigned_tn") || gr.getValue("u_assinged_tn") || ""),
               created: String(gr.getValue("sys_created_on") || "")
             });
           }
