@@ -168,7 +168,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             cards: [
                 { label: "Requested TN", value: TN_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
                 { label: "Requested Speed", value: SPEED_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
-                { label: "Service ID", value: "service_instance_id", font: "tn", tone: tone, optional: true, hideEmpty: true },
+                { label: "Service ID", value: "service_instance_id", font: "tn", tone: tone, optional: true, hideEmpty: true, extra: true },
             ],
         };
     }
@@ -730,10 +730,18 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var key = resolveProfileKey(o, sc);
         var profile = ACTION_PROFILES[key] || ACTION_PROFILES.DEFAULT;
         var build = function(cards) {
-            return (cards || []).map(function(card) {
+            var built = (cards || []).map(function(card) {
                 var tile = buildTile(card, o, sc);
-                return card.hideEmpty && tile.value === "—" ? null : tile;
+                return card.hideEmpty && tile.value === "—" ? null : { card: card, tile: tile };
             }).filter(Boolean);
+            var main = built.filter(function(b) {
+                return !b.card.extra;
+            }).length;
+            return built.filter(function(b) {
+                return !b.card.extra || main < 2;
+            }).map(function(b) {
+                return b.tile;
+            });
         };
         var tiles = build(angular.isFunction(profile.cards) ? profile.cards(o, sc) : profile.cards);
         var usedFallback = false;
