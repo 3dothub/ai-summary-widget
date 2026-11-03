@@ -933,9 +933,20 @@
       copperFlag === "true" ||
       migratorType.indexOf("copper") > -1 ||
       migratorType.indexOf("dsl") > -1;
+    var currentNetworkLower = String(
+      networkTypeLower || findField(inputOrdData, ["network_type", "Network Type"]) || ""
+    ).toLowerCase();
+    var isCopperTarget =
+      currentNetworkLower.indexOf("copper") > -1 ||
+      serviceTypeLower.indexOf("dsl") > -1 ||
+      serviceTypeLower.indexOf("copper") > -1;
+    var isFiberTarget =
+      !isCopperTarget &&
+      (isFiberSpeed(currentRequestedSpeed) ||
+        serviceTypeLower.indexOf("fiber") > -1 ||
+        allProductNamesLower.indexOf("fiber") > -1);
     var isCopperTransition =
-      isCopperSpeed(existingSpeedVal) &&
-      (isFiberSpeed(currentRequestedSpeed) || Boolean(currentRequestedSpeed));
+      isCopperSpeed(existingSpeedVal) && Boolean(currentRequestedSpeed) && isFiberTarget;
     var isMigrationOrder =
       isChangeAction &&
       (isExplicitMigration ||
