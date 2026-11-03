@@ -162,10 +162,13 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
     }
 
-    function serviceStatusProfile(title, label) {
+    function serviceStatusProfile(title, tone) {
         return {
             title: title,
-            cards: NO_CARDS,
+            cards: [
+                { label: "Requested TN", value: TN_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
+                { label: "Requested Speed", value: SPEED_TO, tone: tone, optional: true, hideEmpty: true },
+            ],
         };
     }
 
@@ -308,10 +311,10 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         DISCONNECT: disconnectProfile("Services to Disconnect", "Service to Disconnect"),
         PORT_OUT: disconnectProfile("Services to Port Out", "Service to Port Out"),
-        SUSPEND: serviceStatusProfile("Suspended Services", "Service Suspension"),
-        PAUSE: serviceStatusProfile("Paused Services", "Service Pause"),
-        RESTORE: serviceStatusProfile("Restored Services", "Service Restoration"),
-        RESUME: serviceStatusProfile("Resumed Services", "Service Resumption"),
+        SUSPEND: serviceStatusProfile("Suspended Services", "disco"),
+        PAUSE: serviceStatusProfile("Paused Services", "amber"),
+        RESTORE: serviceStatusProfile("Restored Services", "to"),
+        RESUME: serviceStatusProfile("Resumed Services", "to"),
         MOVE: moveProfile("Services at New Address"),
         FROM: moveProfile("Services Moving Out"),
         TO: moveProfile("Services at New Address"),
@@ -518,7 +521,8 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         isNewInstall: function(o, sc) {
             return o.scenarioType === "NEW_INSTALL" ||
-                (sc.has_tech_install === true && c.existingProducts().length === 0);
+                (sc.has_tech_install === true && c.existingProducts().length === 0 &&
+                    ["SUSPEND", "PAUSE", "RESTORE", "RESUME"].indexOf(c.actionKey()) === -1);
         },
         // Secondary lines: only when both sides are known and actually differ
         speedChanged: function(o, sc) {
@@ -726,8 +730,9 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var profile = ACTION_PROFILES[key] || ACTION_PROFILES.DEFAULT;
         var build = function(cards) {
             return (cards || []).map(function(card) {
-                return buildTile(card, o, sc);
-            });
+                var tile = buildTile(card, o, sc);
+                return card.hideEmpty && tile.value === "—" ? null : tile;
+            }).filter(Boolean);
         };
         var tiles = build(angular.isFunction(profile.cards) ? profile.cards(o, sc) : profile.cards);
         var usedFallback = false;
