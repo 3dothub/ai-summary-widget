@@ -138,13 +138,15 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     //
     // Which profile is used: PROFILE_RULES first, then c.actionKey().
     var NO_CARDS = [];
-    var REQUESTED_DETAIL = ["to_speed", "requested_speed", { from: ["to_tn", "requested_tn"], format: "tn" }];
-    var SPEED_FROM = ["from_speed", "existing_speed"];
-    var SPEED_TO = ["to_speed", "requested_speed"];
+    var SPEED_FROM_FIELDS = ["from_speed", "existing_speed"];
+    var SPEED_TO_FIELDS = ["to_speed", "requested_speed"];
+    var SPEED_FROM = { from: SPEED_FROM_FIELDS, format: "speed" };
+    var SPEED_TO = { from: SPEED_TO_FIELDS, format: "speed" };
+    var REQUESTED_DETAIL = [SPEED_TO, { from: ["to_tn", "requested_tn"], format: "tn" }];
     var TN_FROM = { from: ["from_tn", "existing_tn"], format: "tn" };
     var TN_TO = { from: ["to_tn", "requested_tn"], format: "tn" };
     var CURRENT_SERVICE_CARDS = [
-        { label: "Current Speed", value: SPEED_FROM.concat(SPEED_TO), font: "tn", tone: "to", optional: true, hideEmpty: true },
+        { label: "Current Speed", value: { from: SPEED_FROM_FIELDS.concat(SPEED_TO_FIELDS), format: "speed" }, font: "tn", tone: "to", optional: true, hideEmpty: true },
         { label: "Service ID", value: "service_instance_id", font: "tn", tone: "to", optional: true, hideEmpty: true },
     ];
 
@@ -617,7 +619,22 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 more: items.length > 2 ? "+" + (items.length - 2) + " more" : "",
             };
         },
+        speed: function(v) {
+            return { value: shortSpeed(v) };
+        },
     };
+
+    function shortSpeed(raw) {
+        var text = String(raw || "").trim();
+        var parts = text.split("/").map(function(part) {
+            var m = part.match(/(\d+(?:\.\d+)?)\s*(gbps|gig|gb|g|mbps|mb|m|kbps|kb|k)\b/i);
+            return m ? m[1] + m[2].charAt(0).toUpperCase() : part.trim();
+        }).filter(function(part) {
+            return part !== "";
+        });
+        if (parts.length === 2 && parts[0] === parts[1]) return parts[0];
+        return parts.join("/");
+    }
 
     function hasValue(v) {
         if (angular.isArray(v)) return nonEmpty(v).length > 0;
