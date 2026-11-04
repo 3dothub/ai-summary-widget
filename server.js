@@ -960,20 +960,14 @@
         scenario.scenario_type === "SPEED_CHANGE" ||
         scenario.scenario_type === "SERVICE_CHANGE" ||
         scenario.is_speed_change);
-    var isVoiceModifyTnOrder =
-      isChangeAction &&
-      hasVoiceContext &&
-      !currentRequestedSpeed &&
-      (!scenario.added_services || scenario.added_services.length === 0) &&
-      (!scenario.disconnected_services || scenario.disconnected_services.length === 0);
+    var existingTnDigits = String(existingTnVal || "").replace(/\D/g, "").slice(-10);
+    var requestedTnDigits = String(currentRequestedTn || "").replace(/\D/g, "").slice(-10);
+    var isTnSwapped = !!existingTnDigits && !!requestedTnDigits && existingTnDigits !== requestedTnDigits;
     var isTnChangeOrder =
       isChangeAction &&
       !isMigrationOrder &&
       !isSpeedChangeOrder &&
-      (scenario.scenario_type === "TN_CHANGE" ||
-        scenario.is_tn_change ||
-        (existingTnVal && currentRequestedTn && existingTnVal !== currentRequestedTn) ||
-        isVoiceModifyTnOrder);
+      (scenario.scenario_type === "TN_CHANGE" || isTnSwapped);
     var isInstallOrder =
       !hasSpecificUOrderType &&
       !isChangeAction &&
@@ -1019,6 +1013,8 @@
         orderAction === "billing only" ||
         orderAction === "billing_only" ||
         orderAction.indexOf("billing only") > -1);
+    var apiServiceChange = scenario.scenario_type === "SERVICE_CHANGE" || scenario.is_speed_and_tn_change === true;
+    var apiScenarioTitle = scenario.display_title || "";
     scenario.is_speed_and_tn_change = false;
     // STEP 1: u_order_type takes precedence when populated
     if (hasSpecificUOrderType) {
@@ -1068,6 +1064,24 @@
         scenario.requested_tn = currentRequestedTn || null;
         scenario.is_tn_change = true;
       }
+    } else if (isChangeAction && apiServiceChange) {
+      scenario.scenario_type = "SERVICE_CHANGE";
+      scenario.display_title = apiScenarioTitle || "Speed & Telephone Number Change";
+      scenario.is_speed_and_tn_change = true;
+      scenario.is_speed_change = true;
+      scenario.is_tn_change = true;
+      scenario.is_migration = false;
+      if (!scenario.from_speed && existingSpeedVal) {
+        scenario.from_speed = existingSpeedVal;
+        scenario.existing_speed = existingSpeedVal;
+      }
+      if (!scenario.to_speed && currentRequestedSpeed) {
+        scenario.to_speed = currentRequestedSpeed;
+        scenario.requested_speed = currentRequestedSpeed;
+      }
+      if (!scenario.speed_upgrade && scenario.from_speed && scenario.to_speed) {
+        scenario.speed_upgrade = scenario.from_speed + " ➔ " + scenario.to_speed;
+      }
     } else if (isSpeedChangeOrder) {
       scenario.scenario_type = "SPEED_CHANGE";
       scenario.is_speed_change = true;
@@ -1085,8 +1099,7 @@
       if (scenario.from_speed && scenario.to_speed) {
         scenario.speed_upgrade = scenario.from_speed + " \u2794 " + scenario.to_speed;
       }
-      if ((existingTnVal || currentRequestedTn) &&
-          String(existingTnVal || "").replace(/\D/g, "").slice(-10) !== String(currentRequestedTn || "").replace(/\D/g, "").slice(-10)) {
+      if (isTnSwapped) {
         scenario.from_tn = existingTnVal || null;
         scenario.existing_tn = existingTnVal || null;
         scenario.to_tn = currentRequestedTn || null;
@@ -1094,7 +1107,7 @@
         scenario.is_tn_change = true;
         if (scenario.from_speed && scenario.to_speed && scenario.from_speed !== scenario.to_speed) {
           scenario.scenario_type = "SERVICE_CHANGE";
-          scenario.display_title = "Service Change";
+          scenario.display_title = "Speed & Telephone Number Change";
           scenario.is_speed_and_tn_change = true;
         }
       }

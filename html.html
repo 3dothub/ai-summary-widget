@@ -195,10 +195,10 @@
               <span class="aisw-tile-label">{{t.label}}</span>
               <div class="aisw-tile-value" ng-if="!t.lines" ng-class="t.font ? 'font-' + t.font : ''">{{t.value}}</div>
               <!-- Several values changing together (e.g. speed + TN): same size for every line -->
-              <div class="aisw-tile-lines" ng-if="t.lines">
+              <div class="aisw-tile-lines" ng-if="t.lines" ng-class="{'aisw-tile-stacked': t.stack}">
                 <div class="aisw-tile-line" ng-repeat="l in t.lines track by $index">
                   <span class="aisw-tile-line-label">{{l.label}}</span>
-                  <span class="aisw-tile-value font-line">{{l.value}}</span>
+                  <span class="aisw-tile-value font-line" ng-class="{'tn-value': l.label === 'TN'}">{{l.value}}</span>
                 </div>
               </div>
               <span class="aisw-tile-sub" ng-if="t.sub">{{t.sub}}</span>

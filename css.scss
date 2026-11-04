@@ -1,1696 +1,1698 @@
-  .ai-summary-widget {
-    --yellow-bg-start: #fffbeb;
-    --yellow-bg-end: #fefce8;
-    --yellow-border: #fde68a;
-    --yellow-header-start: #fef08a;
-    --yellow-header-mid: #fde047;
-    --yellow-header-end: #facc15;
-    --yellow-header-border: #eab308;
-    --yellow-badge: #facc15;
-    --yellow-badge-text: #713f12;
-    --blue-tile-bg-start: #f0f9ff;
-    --blue-tile-bg-end: #e0f2fe;
-    --blue-tile-border: #bae6fd;
-    --blue-tile-label: #0284c7;
-    --blue-tile-val: #0369a1;
-    --green-tile-bg-start: #f0fdf4;
-    --green-tile-bg-end: #dcfce7;
-    --green-tile-border: #bbf7d0;
-    --green-tile-label: #16a34a;
-    --green-tile-val: #15803d;
-    --red-tile-bg-start: #fff1f2;
-    --red-tile-bg-end: #ffe4e6;
-    --red-tile-border: #fecdd3;
-    --red-tile-label: #be123c;
-    --red-tile-val: #9f1239;
-    --amber-tile-bg-start: #fffbeb;
-    --amber-tile-bg-end: #fef3c7;
-    --amber-tile-border: #fde68a;
-    --amber-tile-label: #b45309;
-    --amber-tile-val: #92400e;
-    --text-dark: #0f172a;
-    --text-main: #1e293b;
-    --text-sub: #475569;
-    --text-muted: #64748b;
-    --border-light: #e2e8f0;
-    font-family:
-      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
-      Arial, sans-serif;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--text-main);
+.ai-summary-widget {
+  --yellow-bg-start: #fffbeb;
+  --yellow-bg-end: #fefce8;
+  --yellow-border: #fde68a;
+  --yellow-header-start: #fef08a;
+  --yellow-header-mid: #fde047;
+  --yellow-header-end: #facc15;
+  --yellow-header-border: #eab308;
+  --yellow-badge: #facc15;
+  --yellow-badge-text: #713f12;
+  --blue-tile-bg-start: #f0f9ff;
+  --blue-tile-bg-end: #e0f2fe;
+  --blue-tile-border: #bae6fd;
+  --blue-tile-label: #0284c7;
+  --blue-tile-val: #0369a1;
+  --green-tile-bg-start: #f0fdf4;
+  --green-tile-bg-end: #dcfce7;
+  --green-tile-border: #bbf7d0;
+  --green-tile-label: #16a34a;
+  --green-tile-val: #15803d;
+  --red-tile-bg-start: #fff1f2;
+  --red-tile-bg-end: #ffe4e6;
+  --red-tile-border: #fecdd3;
+  --red-tile-label: #be123c;
+  --red-tile-val: #9f1239;
+  --amber-tile-bg-start: #fffbeb;
+  --amber-tile-bg-end: #fef3c7;
+  --amber-tile-border: #fde68a;
+  --amber-tile-label: #b45309;
+  --amber-tile-val: #92400e;
+  --text-dark: #0f172a;
+  --text-main: #1e293b;
+  --text-sub: #475569;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-main);
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40rem;
+  height: 100%;
+  background: #ffffff;
+  border-left: 1px solid var(--border-light);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+  z-index: 99;
+  transition:
+    opacity 200ms ease,
+    max-width 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  &.is-collapsed {
+    opacity: 0;
+    max-width: 0;
+    pointer-events: none;
+  }
+  .text-success {
+    color: #15803d;
+  }
+  .text-danger {
+    color: #b91c1c;
+  }
+  .font-semibold {
+    font-weight: 600;
+  }
+}
+/* ---------------- Rail (Vertical Tab on Screen Edge) ---------------- */
+.aisw-rail {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  z-index: 999;
+}
+.aisw-summary-toggle-btn {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  padding: 12px 7px;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px solid #e0a900;
+  border-right: none;
+  border-radius: 7px 0 0 7px;
+  background: #ffc800;
+  color: #3a2c00;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  box-shadow:
+    0 1px 4px rgba(255, 200, 0, 0.35),
+    0 1px 3px rgba(16, 24, 40, 0.1);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  &:hover {
+    background: #ffd21f;
+    border-color: #cf9800;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+    &::after {
+      animation: none;
+    }
+  }
+  &::after {
+    content: "";
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 40rem;
-    height: 100%;
-    background: #ffffff;
-    border-left: 1px solid var(--border-light);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
-    z-index: 99;
-    transition:
-      opacity 200ms ease,
-      max-width 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.75) 50%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(15deg);
+    pointer-events: none;
+    animation: aisw-shine 2.8s ease-in-out infinite;
+  }
+}
+@keyframes aisw-shine {
+  0% {
+    left: -60%;
+  }
+  40%,
+  100% {
+    left: 130%;
+  }
+}
+.aisw-toggle-icon {
+  font-size: 13px;
+}
+/* ---------------- Panel Container ---------------- */
+.ai-summary-widget .aisw-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.ai-summary-widget .aisw-attached-tab {
+  position: absolute;
+  top: 250px;
+  right: 100%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: none;
+}
+/* ---------------- Header Bar (Warm Golden AI Bar) ---------------- */
+.ai-summary-widget .aisw-header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px;
+  background: linear-gradient(
+    135deg,
+    var(--yellow-header-start) 0%,
+    var(--yellow-header-mid) 50%,
+    var(--yellow-header-end) 100%
+  );
+  border-bottom: 1px solid var(--yellow-header-border);
+  box-shadow: 0 1px 3px rgba(234, 179, 8, 0.15);
+  .aisw-header-sparkle {
+    color: #713f12;
+    font-size: 18px;
+    line-height: 1;
+    filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.6));
+    flex-shrink: 0;
+  }
+  .aisw-header-text {
+    flex: 1;
+    min-width: 0;
+    .aisw-header-title {
+      font-size: 15.5px;
+      font-weight: 700;
+      color: #3b1d06;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: -0.2px;
+      white-space: nowrap;
     }
-    &.is-collapsed {
-      opacity: 0;
-      max-width: 0;
-      pointer-events: none;
+    .aisw-header-order-badge {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #0f172a;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      padding: 2px 10px;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+      letter-spacing: 0.2px;
+      white-space: nowrap;
     }
-    .text-success {
-      color: #15803d;
-    }
-    .text-danger {
-      color: #b91c1c;
-    }
-    .font-semibold {
+    .aisw-header-sub {
+      margin-top: 2px;
+      font-size: 11.5px;
       font-weight: 600;
+      color: #713f12;
+      opacity: 0.95;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
   }
-  /* ---------------- Rail (Vertical Tab on Screen Edge) ---------------- */
-  .aisw-rail {
-    position: fixed;
-    top: 50%;
-    right: 0;
-    transform: translateY(-50%);
-    z-index: 999;
+  .aisw-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
   }
-  .aisw-summary-toggle-btn {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    padding: 12px 7px;
-    min-height: 120px;
+  .aisw-btn-icon {
+    display: inline-block;
+    width: 13px;
+    height: 13px;
+    &.is-spinning {
+      animation: aisw-spin 900ms linear infinite;
+    }
+  }
+  .aisw-icon-btn {
+    width: 26px;
+    height: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    border: 1px solid #e0a900;
-    border-right: none;
-    border-radius: 7px 0 0 7px;
-    background: #ffc800;
-    color: #3a2c00;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    cursor: pointer;
-    box-shadow:
-      0 1px 4px rgba(255, 200, 0, 0.35),
-      0 1px 3px rgba(16, 24, 40, 0.1);
-    position: relative;
-    overflow: hidden;
-    isolation: isolate;
-    &:hover {
-      background: #ffd21f;
-      border-color: #cf9800;
-    }
-    &:disabled {
-      opacity: 0.5;
-      cursor: default;
-      &::after {
-        animation: none;
-      }
-    }
-    &::after {
-      content: "";
-      position: absolute;
-      top: -50%;
-      left: -60%;
-      width: 40%;
-      height: 200%;
-      background: linear-gradient(
-        120deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.75) 50%,
-        rgba(255, 255, 255, 0) 100%
-      );
-      transform: rotate(15deg);
-      pointer-events: none;
-      animation: aisw-shine 2.8s ease-in-out infinite;
-    }
-  }
-  @keyframes aisw-shine {
-    0% {
-      left: -60%;
-    }
-    40%,
-    100% {
-      left: 130%;
-    }
-  }
-  .aisw-toggle-icon {
-    font-size: 13px;
-  }
-  /* ---------------- Panel Container ---------------- */
-  .ai-summary-widget .aisw-panel {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    overflow: hidden;
-  }
-  .ai-summary-widget .aisw-attached-tab {
-    position: absolute;
-    top: 250px;
-    right: 100%;
-    transform: translateY(-50%);
-    z-index: 1;
-    display: none;
-  }
-  /* ---------------- Header Bar (Warm Golden AI Bar) ---------------- */
-  .ai-summary-widget .aisw-header {
-    flex: none;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 13px 14px;
-    background: linear-gradient(
-      135deg,
-      var(--yellow-header-start) 0%,
-      var(--yellow-header-mid) 50%,
-      var(--yellow-header-end) 100%
-    );
-    border-bottom: 1px solid var(--yellow-header-border);
-    box-shadow: 0 1px 3px rgba(234, 179, 8, 0.15);
-    .aisw-header-sparkle {
-      color: #713f12;
-      font-size: 18px;
-      line-height: 1;
-      filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.6));
-      flex-shrink: 0;
-    }
-    .aisw-header-text {
-      flex: 1;
-      min-width: 0;
-      .aisw-header-title {
-        font-size: 15.5px;
-        font-weight: 700;
-        color: #3b1d06;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        letter-spacing: -0.2px;
-        white-space: nowrap;
-      }
-      .aisw-header-order-badge {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: #0f172a;
-        background: #ffffff;
-        border: 1.5px solid #cbd5e1;
-        padding: 2px 10px;
-        border-radius: 6px;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-        letter-spacing: 0.2px;
-        white-space: nowrap;
-      }
-      .aisw-header-sub {
-        margin-top: 2px;
-        font-size: 11.5px;
-        font-weight: 600;
-        color: #713f12;
-        opacity: 0.95;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-    .aisw-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      flex-shrink: 0;
-    }
-    .aisw-btn-icon {
-      display: inline-block;
-      width: 13px;
-      height: 13px;
-      &.is-spinning {
-        animation: aisw-spin 900ms linear infinite;
-      }
-    }
-    .aisw-icon-btn {
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(113, 63, 18, 0.22);
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.65);
-      color: #713f12;
-      cursor: pointer;
-      transition: all 150ms ease;
-      &:hover:not(:disabled) {
-        background: rgba(255, 255, 255, 0.9);
-        border-color: rgba(113, 63, 18, 0.38);
-      }
-    }
-  }
-  @keyframes aisw-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  /* ---------------- Content Body ---------------- */
-  .ai-summary-widget .aisw-content {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 14px 14px 18px;
-    background-color: #fafaf9;
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 3px;
-    }
-    .aisw-loading {
-      font-size: 13px;
-      color: var(--text-muted);
-      padding: 32px 0;
-      text-align: center;
-    }
-  }
-  /* ---------------- 1. Dynamic Scenario Card ---------------- */
-  .ai-summary-widget .aisw-scenario-card {
-    background: linear-gradient(
-      180deg,
-      var(--yellow-bg-start) 0%,
-      var(--yellow-bg-end) 100%
-    );
-    border: 1px solid var(--yellow-border);
-    border-radius: 12px;
-    padding: 14px 13px;
-    margin-bottom: 12px;
-    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.09);
-    .aisw-scenario-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 3px;
-      .aisw-scenario-title {
-        margin: 0;
-        font-size: 14.5px;
-        font-weight: 700;
-        color: #1e293b;
-        letter-spacing: -0.2px;
-      }
-      .aisw-status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 2.5px 9px;
-        border-radius: 16px;
-        font-size: 11px;
-        font-weight: 700;
-        .aisw-status-dot {
-          width: 6px;
-          height: 6px;
-          border-radius: 50%;
-          display: inline-block;
-          &.dot-success {
-            background-color: #10b981;
-            box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
-          }
-          &.dot-danger {
-            background-color: #ef4444;
-            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
-          }
-          &.dot-warning {
-            background-color: #d97706;
-            box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
-          }
-          &.dot-info {
-            background-color: #3b82f6;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-          }
-          &.dot-canceled {
-            background-color: #64748b;
-            box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
-          }
-        }
-        &.badge-danger {
-          background-color: #fef2f2;
-          border: 1px solid #fecaca;
-          color: #991b1b;
-        }
-        &.badge-success {
-          background-color: #ecfdf5;
-          border: 1px solid #a7f3d0;
-          color: #065f46;
-        }
-        &.badge-warning,
-        &.badge-risk {
-          background-color: #fffbeb;
-          border: 1px solid #fde68a;
-          color: #92400e;
-        }
-        &.badge-info {
-          background-color: #eff6ff;
-          border: 1px solid #bfdbfe;
-          color: #1e40af;
-        }
-        &.badge-canceled {
-          background-color: #f1f5f9;
-          border: 1px solid #cbd5e1;
-          color: #475569;
-        }
-      }
-    }
-    .aisw-scenario-subtitle {
-      margin: 0 0 11px 0;
-      font-size: 12px;
-      color: #475569;
-      line-height: 1.45;
-    }
-    /* ---------------- Dedicated Order Health Callout ---------------- */
-    .aisw-health-callout {
-      background-color: #fffbeb;
-      border: 1px solid #fde68a;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 14px;
-      .aisw-health-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 4px;
-      }
-      .aisw-health-title {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: #92400e;
-        .badge-risk-pill {
-          background-color: #fef3c7;
-          color: #b45309;
-          border: 1px solid #fcd34d;
-          padding: 2px 8px;
-          border-radius: 4px;
-          font-size: 12px;
-          margin-left: 4px;
-        }
-      }
-      .aisw-health-status {
-        font-size: 12.5px;
-        font-weight: 600;
-        color: #b45309;
-      }
-      .aisw-health-reason {
-        font-size: 13px;
-        color: #78350f;
-        line-height: 1.45;
-      }
-    }
-    /* ---------------- Dedicated Cancellation Details Card ---------------- */
-    .aisw-cancellation-card {
-      background-color: #fff5f5;
-      border: 1px solid #fed7d7;
-      border-left: 4px solid #e53e3e;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 14px;
-      .aisw-cancellation-header {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-      .aisw-cancellation-badge {
-        display: inline-block;
-        padding: 2px 8px;
-        background-color: #e53e3e;
-        color: #ffffff;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: none;
-        letter-spacing: 0;
-        border-radius: 4px;
-      }
-      .aisw-cancellation-title {
-        font-size: 13.5px;
-        font-weight: 700;
-        color: #9b2c2c;
-      }
-      .aisw-cancellation-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 8px;
-      }
-      .aisw-cancellation-item {
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        background-color: #ffffff;
-        padding: 8px 12px;
-        border-radius: 6px;
-        border: 1px solid #fed7d7;
-      }
-      .aisw-cancellation-label {
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: none;
-        letter-spacing: 0;
-        color: #a0aec0;
-      }
-      .aisw-cancellation-val {
-        font-size: 13px;
-        font-weight: 600;
-        color: #2d3748;
-        word-break: break-word;
-      }
-    }
-    /* ---------------- Transition Tiles Row ---------------- */
-    .aisw-tiles-row {
-      display: flex;
-      align-items: stretch;
-      gap: 8px;
-      margin-bottom: 12px;
-      .aisw-tile {
-        flex: 1 1 0;
-        min-width: 0;
-        min-height: 86px;
-        border-radius: 10px;
-        padding: 10px 11px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-        .aisw-tile-value.aisw-installation-appointment {
-          font-size: 14px !important;
-          font-weight: 800 !important;
-        }
-        .aisw-tile-sub.aisw-installation-date {
-          font-size: 11px !important;
-          font-weight: 600 !important;
-        }
-        .aisw-tile-label {
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-          display: block;
-          margin-bottom: 3px;
-        }
-        .aisw-tile-value {
-          font-size: 17px;
-          font-weight: 800;
-          line-height: 1.25;
-          letter-spacing: -0.3px;
-          font-variant-numeric: tabular-nums;
-          word-break: break-word;
-          &.font-compact {
-            font-size: 13px;
-            margin-top: 1px;
-          }
-          &.font-tn {
-            font-size: 14px !important;
-            font-weight: 700 !important;
-            white-space: nowrap !important;
-            line-height: 1.3;
-          }
-        }
-        .aisw-tile-sub {
-          font-size: 10px;
-          font-weight: 600;
-          display: block;
-          margin-top: 2px;
-        }
-        /* FROM / EXISTING (Sky Blue) */
-        &.tile-from {
-          background: linear-gradient(
-            135deg,
-            var(--blue-tile-bg-start) 0%,
-            var(--blue-tile-bg-end) 100%
-          ) !important;
-          border: 1px solid var(--blue-tile-border) !important;
-          .aisw-tile-label {
-            color: var(--blue-tile-label) !important;
-          }
-          .aisw-tile-value {
-            color: var(--blue-tile-val) !important;
-          }
-          .aisw-tile-sub {
-            color: #0284c7;
-          }
-        }
-        /* TO / REQUESTED (Emerald Green) */
-        &.tile-to {
-          background: linear-gradient(
-            135deg,
-            var(--green-tile-bg-start) 0%,
-            var(--green-tile-bg-end) 100%
-          ) !important;
-          border: 1px solid var(--green-tile-border) !important;
-          .aisw-tile-label {
-            color: var(--green-tile-label) !important;
-          }
-          .aisw-tile-value {
-            color: var(--green-tile-val) !important;
-          }
-          .aisw-tile-sub {
-            color: #16a34a;
-          }
-        }
-        /* DISCONNECTED (Rose Red) */
-        &.tile-disco {
-          background: linear-gradient(
-            135deg,
-            var(--red-tile-bg-start) 0%,
-            var(--red-tile-bg-end) 100%
-          ) !important;
-          border: 1px solid var(--red-tile-border) !important;
-          .aisw-tile-label {
-            color: var(--red-tile-label) !important;
-          }
-          .aisw-tile-value {
-            color: var(--red-tile-val) !important;
-          }
-          .aisw-tile-sub {
-            color: #be123c;
-          }
-        }
-        /* INSTALL APPOINTMENT (Warm Amber) */
-        &.tile-amber {
-          background: linear-gradient(
-            135deg,
-            var(--amber-tile-bg-start) 0%,
-            var(--amber-tile-bg-end) 100%
-          ) !important;
-          border: 1px solid var(--amber-tile-border) !important;
-          .aisw-tile-label {
-            color: var(--amber-tile-label) !important;
-          }
-          .aisw-tile-value {
-            color: var(--amber-tile-val) !important;
-          }
-          .aisw-tile-sub {
-            color: #b45309;
-          }
-        }
-        /* SLATE / GENERAL */
-        &.tile-slate {
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-          border: 1px solid #e2e8f0 !important;
-          .aisw-tile-label {
-            color: #475569 !important;
-          }
-          .aisw-tile-value {
-            color: #1e293b !important;
-          }
-          .aisw-tile-sub {
-            color: #64748b;
-          }
-        }
-      }
-      /* Transition Arrow Bubble: vertically centered, overlapping both tiles */
-      .aisw-tile-arrow-bubble {
-        align-self: center;
-        margin: 0 -11px;
-        position: relative;
-        z-index: 1;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: #ffffff;
-        border: 1.5px solid #cbd5e1;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #0284c7;
-        font-size: 14px;
-        font-weight: 800;
-        flex-shrink: 0;
-      }
-    }
-    .aisw-scenario-narrative {
-      margin: 0;
-      font-size: 12px;
-      font-style: normal;
-      color: #334155;
-      line-height: 1.5;
-      word-break: break-word;
-      overflow-wrap: anywhere;
-      em,
-      i,
-      .aisw-error-text {
-        font-style: italic;
-        font-weight: 600;
-        color: #b91c1c;
-      }
-    }
-  }
-  /* Due date: separate, right-aligned chip beneath status, matching reference layout. */
-  .ai-summary-widget .aisw-scenario-header {
-    align-items: flex-start;
-    gap: 8px;
-  }
-  .ai-summary-widget .aisw-scenario-header .aisw-scenario-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow-wrap: break-word;
-  }
-  .ai-summary-widget .aisw-scenario-header .aisw-status-badge {
-    flex: 0 0 auto;
-    white-space: nowrap;
-  }
-  .ai-summary-widget .aisw-due-date-row {
-    display: flex;
-    justify-content: flex-end;
-    margin: 3px 0 13px;
-    padding: 0;
-    clear: both;
-  }
-  .ai-summary-widget .aisw-due-date-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    max-width: 100%;
-    padding: 5px 9px;
-    border: 1px solid #bae6fd;
-    border-radius: 7px;
-    background: #eff6ff;
-    color: #334155;
-    font-size: 11.5px;
-    font-weight: 700;
-    line-height: 1.4;
-    white-space: nowrap;
-  }
-  .ai-summary-widget .aisw-due-date-icon {
-    color: #1e3a8a;
-    font-size: 13px;
-    line-height: 1;
-  }
-  /* Equal-height speed comparison boxes; keep existing tile colors. */
-  .ai-summary-widget .aisw-tiles-row > .aisw-tile {
-    align-self: stretch;
-    box-sizing: border-box;
-  }
-  /* ---------------- 2. Service Address Banner ---------------- */
-  .ai-summary-widget .aisw-banner {
-    background-color: #eff6ff;
-    border: 1px solid #dbeafe;
+    border: 1px solid rgba(113, 63, 18, 0.22);
     border-radius: 6px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: baseline;
-    gap: 6px;
-    font-size: 12px;
-    line-height: 1.4;
-    color: #1e40af;
-    .aisw-banner-icon {
-      font-size: 13px;
-      color: #2563eb;
-      flex-shrink: 0;
-      display: inline-block;
-      transform: translateY(1px);
-    }
-    .aisw-banner-label {
-      font-weight: 600;
-      color: #2563eb;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .aisw-banner-text {
-      font-weight: 700;
-      color: #0f172a;
-      word-break: break-word;
+    background: rgba(255, 255, 255, 0.65);
+    color: #713f12;
+    cursor: pointer;
+    transition: all 150ms ease;
+    &:hover:not(:disabled) {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(113, 63, 18, 0.38);
     }
   }
-  /* ---------------- 3. Products in Order ---------------- */
-  .ai-summary-widget .aisw-products-section {
-    margin-bottom: 12px;
-    .aisw-section-heading {
-      margin: 0 0 7px 0;
-      font-size: 12.5px;
+}
+@keyframes aisw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* ---------------- Content Body ---------------- */
+.ai-summary-widget .aisw-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 14px 18px;
+  background-color: #fafaf9;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+  .aisw-loading {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 32px 0;
+    text-align: center;
+  }
+}
+/* ---------------- 1. Dynamic Scenario Card ---------------- */
+.ai-summary-widget .aisw-scenario-card {
+  background: linear-gradient(
+    180deg,
+    var(--yellow-bg-start) 0%,
+    var(--yellow-bg-end) 100%
+  );
+  border: 1px solid var(--yellow-border);
+  border-radius: 12px;
+  padding: 14px 13px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.09);
+  .aisw-scenario-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3px;
+    .aisw-scenario-title {
+      margin: 0;
+      font-size: 14.5px;
       font-weight: 700;
-      color: #334155;
+      color: #1e293b;
+      letter-spacing: -0.2px;
     }
-    .aisw-prod-card {
-      border-radius: 8px;
-      padding: 10px 11px;
-      margin-bottom: 8px;
-      &:last-child {
-        margin-bottom: 0;
-      }
-      &.prod-card-existing {
-        background: #fef2f2;
-        border: 1px solid #fee2e2;
-        .aisw-prod-card-title {
-          color: #9f1239;
-        }
-      }
-      &.prod-card-requested {
-        background: #eff6ff;
-        border: 1px solid #dbeafe;
-        .aisw-prod-card-title {
-          color: #1e40af;
-        }
-      }
-    }
-    .aisw-prod-card-header {
-      display: flex;
-      justify-content: space-between;
+    .aisw-status-badge {
+      display: inline-flex;
       align-items: center;
-      margin-bottom: 8px;
-    }
-    .aisw-prod-card-title {
-      font-size: 11.5px;
+      gap: 5px;
+      padding: 2.5px 9px;
+      border-radius: 16px;
+      font-size: 11px;
       font-weight: 700;
-    }
-    .aisw-prod-badge {
-      font-size: 9.5px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 4px;
-      white-space: nowrap;
-      &.badge-success {
-        background: #bbf7d0;
-        color: #166534;
-      }
-      &.badge-warning {
-        background: #fef3c7;
-        color: #b45309;
+      .aisw-status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+        &.dot-success {
+          background-color: #10b981;
+          box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+        }
+        &.dot-danger {
+          background-color: #ef4444;
+          box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
+        }
+        &.dot-warning {
+          background-color: #d97706;
+          box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.25);
+        }
+        &.dot-info {
+          background-color: #3b82f6;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        }
+        &.dot-canceled {
+          background-color: #64748b;
+          box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.25);
+        }
       }
       &.badge-danger {
-        background: #fecdd3;
-        color: #9f1239;
+        background-color: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #991b1b;
+      }
+      &.badge-success {
+        background-color: #ecfdf5;
+        border: 1px solid #a7f3d0;
+        color: #065f46;
+      }
+      &.badge-warning,
+      &.badge-risk {
+        background-color: #fffbeb;
+        border: 1px solid #fde68a;
+        color: #92400e;
       }
       &.badge-info {
-        background: #dbeafe;
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
         color: #1e40af;
       }
       &.badge-canceled {
-        background: #e2e8f0;
+        background-color: #f1f5f9;
+        border: 1px solid #cbd5e1;
         color: #475569;
       }
     }
-    /* Match the existing-services heading, regardless of API status tone. */
-    .prod-card-existing .aisw-prod-badge.aisw-existing-status {
-      color: #9f1239;
-      background: #fecdd3;
-      text-transform: none;
+  }
+  .aisw-scenario-subtitle {
+    margin: 0 0 11px 0;
+    font-size: 12px;
+    color: #475569;
+    line-height: 1.45;
+  }
+  /* ---------------- Dedicated Order Health Callout ---------------- */
+  .aisw-health-callout {
+    background-color: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    .aisw-health-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
     }
-    .aisw-prod-badge {
-      text-transform: none;
+    .aisw-health-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #92400e;
+      .badge-risk-pill {
+        background-color: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fcd34d;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        margin-left: 4px;
+      }
     }
-    .aisw-prod-list {
+    .aisw-health-status {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #b45309;
+    }
+    .aisw-health-reason {
+      font-size: 13px;
+      color: #78350f;
+      line-height: 1.45;
+    }
+  }
+  /* ---------------- Dedicated Cancellation Details Card ---------------- */
+  .aisw-cancellation-card {
+    background-color: #fff5f5;
+    border: 1px solid #fed7d7;
+    border-left: 4px solid #e53e3e;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    .aisw-cancellation-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .aisw-cancellation-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background-color: #e53e3e;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: 0;
+      border-radius: 4px;
+    }
+    .aisw-cancellation-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #9b2c2c;
+    }
+    .aisw-cancellation-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+    .aisw-cancellation-item {
       display: flex;
       flex-direction: column;
-      gap: 6px;
-    }
-    .aisw-prod-row {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
+      gap: 2px;
+      background-color: #ffffff;
+      padding: 8px 12px;
       border-radius: 6px;
-      padding: 7px 10px;
-      font-size: 12px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+      border: 1px solid #fed7d7;
     }
-    .aisw-prod-icon-badge {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      svg {
-        width: 15px;
-        height: 15px;
-      }
-      &.badge-icon-fiber {
-        background-color: #eff6ff;
-        color: #2563eb;
-        border: 1px solid #dbeafe;
-      }
-      &.badge-icon-voice {
-        background-color: #f5f3ff;
-        color: #7c3aed;
-        border: 1px solid #ede9fe;
-      }
-      &.badge-icon-wifi {
-        background-color: #ecfeff;
-        color: #0891b2;
-        border: 1px solid #cffafe;
-      }
-      &.badge-icon-tv {
-        background-color: #fff7ed;
-        color: #ea580c;
-        border: 1px solid #ffedd5;
-      }
-      &.badge-icon-wireless {
-        background-color: #ecfdf5;
-        color: #059669;
-        border: 1px solid #d1fae5;
-      }
-      &.badge-icon-dsl {
-        background-color: #f8fafc;
-        color: #475569;
-        border: 1px solid #e2e8f0;
-      }
-      &.badge-icon-default {
-        background-color: #f1f5f9;
-        color: #3b82f6;
-        border: 1px solid #e2e8f0;
-      }
+    .aisw-cancellation-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #a0aec0;
     }
-    .aisw-prod-name {
-      font-weight: 700;
-      color: #1e293b;
+    .aisw-cancellation-val {
+      font-size: 13px;
+      font-weight: 600;
+      color: #2d3748;
       word-break: break-word;
     }
   }
-  /* ---------------- 4. Case Ownership & Next Actions ---------------- */
-  .ai-summary-widget .aisw-card-section {
-    margin-bottom: 12px;
-    .aisw-section-heading {
-      margin: 0 0 7px 0;
-      font-size: 12.5px;
-      font-weight: 700;
-      color: #334155;
-      text-transform: capitalize;
-    }
-    .aisw-case-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      padding: 8px 10px;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      margin-bottom: 6px;
-      &:last-child {
-        margin-bottom: 0;
-      }
-      .aisw-case-left {
-        .aisw-case-title {
-          font-size: 12px;
-          font-weight: 600;
-          color: var(--text-main);
-        }
-        .aisw-case-subtext {
-          font-size: 11px;
-          color: var(--text-muted);
-          margin-top: 2px;
-        }
-      }
-      .aisw-case-right {
-        font-size: 11px;
-        font-weight: 600;
-        color: #475569;
-        background: #f1f5f9;
-        padding: 2px 6px;
-        border-radius: 4px;
-      }
-    }
-  }
-  /* ---------------- Radar Pulse Animation for Health Badges ---------------- */
-  .aisw-status-badge.badge-success .aisw-status-dot,
-  .aisw-status-dot.dot-success {
-    background-color: #16a34a;
-    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
-    animation: health-pulse-green 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .aisw-status-badge.badge-danger .aisw-status-dot,
-  .aisw-status-dot.dot-danger {
-    background-color: #dc2626;
-    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.8);
-    animation: health-pulse-red 1.3s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .aisw-status-badge.badge-warning .aisw-status-dot,
-  .aisw-status-dot.dot-warning {
-    background-color: #d97706;
-    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
-    animation: health-pulse-amber 1.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  @keyframes health-pulse-green {
-    0% {
-      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 7px rgba(22, 163, 74, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
-    }
-  }
-  @keyframes health-pulse-red {
-    0% {
-      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.8);
-    }
-    70% {
-      box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
-    }
-  }
-  @keyframes health-pulse-amber {
-    0% {
-      box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
-    }
-    70% {
-      box-shadow: 0 0 0 7px rgba(217, 119, 6, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
-    }
-  }
-  /* ---------------- Section Header Row ---------------- */
-  .aisw-section-header-row {
+  /* ---------------- Transition Tiles Row ---------------- */
+  .aisw-tiles-row {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: stretch;
     gap: 8px;
-    margin-bottom: 8px;
-    .aisw-section-heading {
-      margin-bottom: 0 !important;
+    margin-bottom: 12px;
+    .aisw-tile {
+      flex: 1 1 0;
+      min-width: 0;
+      min-height: 86px;
+      border-radius: 10px;
+      padding: 10px 11px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      .aisw-tile-value.aisw-installation-appointment {
+        font-size: 14px !important;
+        font-weight: 800 !important;
+      }
+      .aisw-tile-sub.aisw-installation-date {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+      }
+      .aisw-tile-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        display: block;
+        margin-bottom: 3px;
+      }
+      .aisw-tile-value {
+        font-size: 17px;
+        font-weight: 800;
+        line-height: 1.25;
+        letter-spacing: -0.3px;
+        font-variant-numeric: tabular-nums;
+        word-break: break-word;
+        &.font-compact {
+          font-size: 13px;
+          margin-top: 1px;
+        }
+        &.font-tn {
+          font-size: 14px !important;
+          font-weight: 700 !important;
+          white-space: nowrap !important;
+          line-height: 1.3;
+        }
+      }
+      .aisw-tile-sub {
+        font-size: 10px;
+        font-weight: 600;
+        display: block;
+        margin-top: 2px;
+      }
+      /* FROM / EXISTING (Sky Blue) */
+      &.tile-from {
+        background: linear-gradient(
+          135deg,
+          var(--blue-tile-bg-start) 0%,
+          var(--blue-tile-bg-end) 100%
+        ) !important;
+        border: 1px solid var(--blue-tile-border) !important;
+        .aisw-tile-label {
+          color: var(--blue-tile-label) !important;
+        }
+        .aisw-tile-value {
+          color: var(--blue-tile-val) !important;
+        }
+        .aisw-tile-sub {
+          color: #0284c7;
+        }
+      }
+      /* TO / REQUESTED (Emerald Green) */
+      &.tile-to {
+        background: linear-gradient(
+          135deg,
+          var(--green-tile-bg-start) 0%,
+          var(--green-tile-bg-end) 100%
+        ) !important;
+        border: 1px solid var(--green-tile-border) !important;
+        .aisw-tile-label {
+          color: var(--green-tile-label) !important;
+        }
+        .aisw-tile-value {
+          color: var(--green-tile-val) !important;
+        }
+        .aisw-tile-sub {
+          color: #16a34a;
+        }
+      }
+      /* DISCONNECTED (Rose Red) */
+      &.tile-disco {
+        background: linear-gradient(
+          135deg,
+          var(--red-tile-bg-start) 0%,
+          var(--red-tile-bg-end) 100%
+        ) !important;
+        border: 1px solid var(--red-tile-border) !important;
+        .aisw-tile-label {
+          color: var(--red-tile-label) !important;
+        }
+        .aisw-tile-value {
+          color: var(--red-tile-val) !important;
+        }
+        .aisw-tile-sub {
+          color: #be123c;
+        }
+      }
+      /* INSTALL APPOINTMENT (Warm Amber) */
+      &.tile-amber {
+        background: linear-gradient(
+          135deg,
+          var(--amber-tile-bg-start) 0%,
+          var(--amber-tile-bg-end) 100%
+        ) !important;
+        border: 1px solid var(--amber-tile-border) !important;
+        .aisw-tile-label {
+          color: var(--amber-tile-label) !important;
+        }
+        .aisw-tile-value {
+          color: var(--amber-tile-val) !important;
+        }
+        .aisw-tile-sub {
+          color: #b45309;
+        }
+      }
+      /* SLATE / GENERAL */
+      &.tile-slate {
+        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        border: 1px solid #e2e8f0 !important;
+        .aisw-tile-label {
+          color: #475569 !important;
+        }
+        .aisw-tile-value {
+          color: #1e293b !important;
+        }
+        .aisw-tile-sub {
+          color: #64748b;
+        }
+      }
+    }
+    /* Transition Arrow Bubble: vertically centered, overlapping both tiles */
+    .aisw-tile-arrow-bubble {
+      align-self: center;
+      margin: 0 -11px;
+      position: relative;
+      z-index: 1;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 1.5px solid #cbd5e1;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #0284c7;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
     }
   }
-  .aisw-directive-pill {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0;
-    padding: 2.5px 8px;
-    border-radius: 9999px;
-    text-transform: none;
+  .aisw-scenario-narrative {
+    margin: 0;
+    font-size: 12px;
+    font-style: normal;
+    color: #334155;
+    line-height: 1.5;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    em,
+    i,
+    .aisw-error-text {
+      font-style: italic;
+      font-weight: 600;
+      color: #b91c1c;
+    }
+  }
+}
+/* Due date: separate, right-aligned chip beneath status, matching reference layout. */
+.ai-summary-widget .aisw-scenario-header {
+  align-items: flex-start;
+  gap: 8px;
+}
+.ai-summary-widget .aisw-scenario-header .aisw-scenario-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+.ai-summary-widget .aisw-scenario-header .aisw-status-badge {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.ai-summary-widget .aisw-due-date-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 3px 0 13px;
+  padding: 0;
+  clear: both;
+}
+.ai-summary-widget .aisw-due-date-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 5px 9px;
+  border: 1px solid #bae6fd;
+  border-radius: 7px;
+  background: #eff6ff;
+  color: #334155;
+  font-size: 11.5px;
+  font-weight: 700;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.ai-summary-widget .aisw-due-date-icon {
+  color: #1e3a8a;
+  font-size: 13px;
+  line-height: 1;
+}
+/* Equal-height speed comparison boxes; keep existing tile colors. */
+.ai-summary-widget .aisw-tiles-row > .aisw-tile {
+  align-self: stretch;
+  box-sizing: border-box;
+}
+/* ---------------- 2. Service Address Banner ---------------- */
+.ai-summary-widget .aisw-banner {
+  background-color: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: #1e40af;
+  .aisw-banner-icon {
+    font-size: 13px;
+    color: #2563eb;
+    flex-shrink: 0;
+    display: inline-block;
+    transform: translateY(1px);
+  }
+  .aisw-banner-label {
+    font-weight: 600;
+    color: #2563eb;
     white-space: nowrap;
+    flex-shrink: 0;
   }
-  .directive-pill-auto {
-    background: #dcfce7;
-    color: #15803d;
-    border: 1px solid #bbf7d0;
+  .aisw-banner-text {
+    font-weight: 700;
+    color: #0f172a;
+    word-break: break-word;
   }
-  .directive-pill-manual {
-    background: #fef3c7;
-    color: #b45309;
-    border: 1px solid #fde68a;
+}
+/* ---------------- 3. Products in Order ---------------- */
+.ai-summary-widget .aisw-products-section {
+  margin-bottom: 12px;
+  .aisw-section-heading {
+    margin: 0 0 7px 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #334155;
   }
-  .directive-pill-critical {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
-  }
-  .directive-pill-completed {
-    background: #ecfdf5;
-    color: #047857;
-    border: 1px solid #a7f3d0;
-  }
-  .directive-pill-danger {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
-  }
-  .directive-pill-warning {
-    background: #fef3c7;
-    color: #b45309;
-    border: 1px solid #fde68a;
-  }
-  .directive-pill-success {
-    background: #ecfdf5;
-    color: #047857;
-    border: 1px solid #a7f3d0;
-  }
-  .directive-pill-neutral {
-    background: #f1f5f9;
-    color: #475569;
-    border: 1px solid #e2e8f0;
-  }
-  .directive-pill-info {
-    background: #dbeafe;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
-  }
-  /* ---------------- Next Action Directive Card (minimal, themed) ---------------- */
-  .action-directive-card {
-    --t-bg: #f3f7ff;
-    --t-border: #bfdbfe;
-    --t-icon-bg: #dbeafe;
-    --t-icon: #2563eb;
-    --t-title: #0f172a;
-    --t-divider: #dbe5f5;
-    background: var(--t-bg);
-    border: 1px solid var(--t-border);
-    border-radius: 10px;
-    padding: 12px 14px;
+  .aisw-prod-card {
+    border-radius: 8px;
+    padding: 10px 11px;
     margin-bottom: 8px;
     &:last-child {
       margin-bottom: 0;
     }
-    &.theme-danger {
-      --t-bg: #fef6f6;
-      --t-border: #fecaca;
-      --t-icon-bg: #fee2e2;
-      --t-icon: #dc2626;
-      --t-divider: #f8d4d4;
+    &.prod-card-existing {
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+      .aisw-prod-card-title {
+        color: #9f1239;
+      }
     }
-    &.theme-warning {
-      --t-bg: #fffbeb;
-      --t-border: #fde68a;
-      --t-icon-bg: #fef3c7;
-      --t-icon: #d97706;
-      --t-divider: #f6e7b0;
-    }
-    &.theme-success {
-      --t-bg: #f2fcf6;
-      --t-border: #bbf7d0;
-      --t-icon-bg: #dcfce7;
-      --t-icon: #16a34a;
-      --t-divider: #cdeedb;
-    }
-    &.theme-neutral {
-      --t-bg: #f8fafc;
-      --t-border: #e2e8f0;
-      --t-icon-bg: #e2e8f0;
-      --t-icon: #475569;
-      --t-divider: #e2e8f0;
+    &.prod-card-requested {
+      background: #eff6ff;
+      border: 1px solid #dbeafe;
+      .aisw-prod-card-title {
+        color: #1e40af;
+      }
     }
   }
-  .directive-head {
+  .aisw-prod-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .aisw-prod-card-title {
+    font-size: 11.5px;
+    font-weight: 700;
+  }
+  .aisw-prod-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    white-space: nowrap;
+    text-transform: uppercase !important;
+    &.badge-success {
+      background: #bbf7d0;
+      color: #166534;
+    }
+    &.badge-warning {
+      background: #fef3c7;
+      color: #b45309;
+    }
+    &.badge-danger {
+      background: #fecdd3;
+      color: #9f1239;
+    }
+    &.badge-info {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    &.badge-canceled {
+      background: #e2e8f0;
+      color: #475569;
+    }
+  }
+  /* Match the existing-services heading, regardless of API status tone. */
+  .prod-card-existing .aisw-prod-badge.aisw-existing-status {
+    color: #9f1239;
+    background: #fecdd3;
+    text-transform: none;
+  }
+
+  .aisw-prod-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .aisw-prod-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 7px 10px;
+    font-size: 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
   }
-  .directive-icon-circle {
-    flex-shrink: 0;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--t-icon-bg);
-    color: var(--t-icon);
-    display: flex;
+  .aisw-prod-icon-badge {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
     svg {
       width: 15px;
       height: 15px;
     }
+    &.badge-icon-fiber {
+      background-color: #eff6ff;
+      color: #2563eb;
+      border: 1px solid #dbeafe;
+    }
+    &.badge-icon-voice {
+      background-color: #f5f3ff;
+      color: #7c3aed;
+      border: 1px solid #ede9fe;
+    }
+    &.badge-icon-wifi {
+      background-color: #ecfeff;
+      color: #0891b2;
+      border: 1px solid #cffafe;
+    }
+    &.badge-icon-tv {
+      background-color: #fff7ed;
+      color: #ea580c;
+      border: 1px solid #ffedd5;
+    }
+    &.badge-icon-wireless {
+      background-color: #ecfdf5;
+      color: #059669;
+      border: 1px solid #d1fae5;
+    }
+    &.badge-icon-dsl {
+      background-color: #f8fafc;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+    &.badge-icon-default {
+      background-color: #f1f5f9;
+      color: #3b82f6;
+      border: 1px solid #e2e8f0;
+    }
   }
-  .directive-title {
-    flex: 1;
-    min-width: 0;
-    font-size: 13px;
+  .aisw-prod-name {
     font-weight: 700;
-    line-height: 1.35;
-    color: var(--t-title);
+    color: #1e293b;
+    word-break: break-word;
   }
-  .directive-instruction {
-    margin-top: 8px;
-    font-size: 11.5px;
-    font-weight: 500;
-    line-height: 1.5;
-    color: #475569;
-  }
-  .directive-footer {
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid var(--t-border);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11.5px;
-  }
-  .directive-meta-label {
-    font-weight: 600;
-    color: #64748b;
-    flex-shrink: 0;
-  }
-  .directive-owner-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 9px;
-    border-radius: 12px;
-    font-size: 11px;
+}
+/* ---------------- 4. Case Ownership & Next Actions ---------------- */
+.ai-summary-widget .aisw-card-section {
+  margin-bottom: 12px;
+  .aisw-section-heading {
+    margin: 0 0 7px 0;
+    font-size: 12.5px;
     font-weight: 700;
-    background: #ffffff;
-    border: 1px solid var(--t-border);
-    color: var(--t-icon);
+    color: #334155;
+    text-transform: capitalize;
   }
-  .directive-owner-icon {
-    font-size: 12px;
-  }
-  /* Alignment correction: same-width tiles, centered arrow, no overlapping text. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
+  .aisw-case-row {
     display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 8px;
-    width: 100%;
-    min-width: 0;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
-    flex: 1 1 0;
-    width: 0;
-    min-width: 0;
-    min-height: 72px;
-    height: auto;
-    box-sizing: border-box;
-    align-self: stretch;
-    overflow: hidden;
-    padding: 10px 9px;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-label,
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-value,
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-sub {
-    max-width: 100%;
-    overflow-wrap: anywhere;
-    word-break: normal;
-    white-space: normal !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-value.font-tn {
-    font-size: 12px !important;
-    line-height: 1.35;
-    font-variant-numeric: tabular-nums;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
-    flex: 0 0 24px;
-    width: 24px;
-    height: 24px;
-    margin: auto -9px;
-    box-sizing: border-box;
-    align-self: center;
-    position: relative;
-    z-index: 2;
-  }
-  /* Final layout: due date and status on the SAME line as the scenario title. */
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
     justify-content: space-between;
-    flex-wrap: nowrap;
-    gap: 6px;
-    margin-bottom: 10px;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-title {
-    flex: 1 1 auto;
-    min-width: 0;
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.3;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-header-right {
-    display: flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 5px;
-    min-width: 0;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-due-date-chip {
-    padding: 3px 6px;
-    gap: 4px;
-    font-size: 10px;
-    line-height: 1.3;
+    align-items: flex-start;
+    padding: 8px 10px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 6px;
-    white-space: nowrap;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-status-badge {
-    flex: 0 0 auto;
-    padding: 3px 7px;
-    font-size: 10px;
-    white-space: nowrap;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-subtitle {
-    clear: both;
-  }
-  /* Two equal boxes, fixed-size arrow between them. No negative margins or overlap. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: stretch;
-    gap: 7px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
-    flex: 1 1 0;
-    width: auto;
-    min-width: 0;
-    min-height: 74px;
-    height: auto;
-    align-self: stretch;
-    box-sizing: border-box;
-    overflow: visible;
-    padding: 10px 9px;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
-    flex: 0 0 24px;
-    width: 24px;
-    height: 24px;
-    align-self: center;
-    margin: 0;
-    position: relative;
-    z-index: 1;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-label,
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-value,
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-sub {
-    overflow-wrap: anywhere;
-    word-break: normal;
-    white-space: normal !important;
-  }
-  /* Responsive scenario header: title never collides with date/status. */
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start !important;
-    column-gap: 7px;
-    row-gap: 5px;
-    margin-bottom: 10px;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-scenario-title {
-    min-width: 0 !important;
-    max-width: 100%;
-    white-space: normal !important;
-    overflow-wrap: normal;
-    word-break: normal;
-    line-height: 1.3;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-header-right {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-wrap: nowrap;
-    gap: 4px;
-    min-width: 0;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-due-date-chip {
-    font-size: 9px;
-    padding: 3px 5px;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-status-badge {
-    font-size: 9px;
-    padding: 3px 5px;
-  }
-  @media (max-width: 345px) {
-    .ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
-      grid-template-columns: minmax(0, 1fr);
-    }
-    .ai-summary-widget .aisw-scenario-card .aisw-header-right {
-      justify-content: flex-start;
-    }
-  }
-  /* Uniform tiles for all scenarios, including multi-product installations. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
-    display: flex !important;
-    align-items: stretch !important;
-    flex-wrap: nowrap !important;
-    gap: 7px !important;
-    width: 100%;
-    min-width: 0;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
-    flex: 1 1 0 !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    min-height: 74px;
-    height: auto !important;
-    padding: 9px 8px !important;
-    box-sizing: border-box;
-    overflow: hidden !important;
-    margin: 0 !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
-    flex: 0 0 24px !important;
-    width: 24px !important;
-    height: 24px !important;
-    align-self: center !important;
-    margin: 0 !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tile-value,
-  .ai-summary-widget .aisw-scenario-card .aisw-tile-sub {
-    max-width: 100%;
-    overflow-wrap: anywhere !important;
-    word-break: normal !important;
-    white-space: normal !important;
-  }
-  /* Shared content-driven layout for ALL order scenarios. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    align-items: stretch !important;
-    gap: 7px !important;
-    margin-bottom: 10px !important;
-    min-width: 0;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
-    flex: 1 1 0 !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 7px 8px !important;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    overflow-wrap: anywhere;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row .aisw-tile-label {
-    margin: 0 0 3px !important;
-    line-height: 1.2 !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row .aisw-tile-value {
-    margin: 0 !important;
-    line-height: 1.25 !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row .aisw-tile-sub {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
-    flex: 0 0 24px !important;
-    width: 24px !important;
-    height: 24px !important;
-    align-self: center !important;
-    margin: 0 !important;
-  }
-  /* Independent requested details: equal, content-sized boxes without a comparison arrow. */
-  .ai-summary-widget .aisw-scenario-card .aisw-requested-details {
-    display: flex !important;
-    gap: 7px !important;
-    align-items: stretch !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-requested-details > .aisw-tile {
-    flex: 1 1 0 !important;
-    width: 0 !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    padding: 8px 9px !important;
-  }
-  /* Single requested value: do not stretch a lone tile across the entire row.
-    Two available values still share the row equally. Applies to all matching scenarios. */
-  .ai-summary-widget .aisw-scenario-card .aisw-requested-details > .aisw-tile:only-child {
-    flex: 0 1 calc((100% - 7px) / 2) !important;
-    width: calc((100% - 7px) / 2) !important;
-    max-width: calc((100% - 7px) / 2) !important;
-    min-width: 0 !important;
-    box-sizing: border-box;
-  }
-  /* Shared single-tile sizing: applies to Disconnection, Restoration,
-    Suspension, Resumption, Move, and every other scenario. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child {
-    flex: 0 0 calc((100% - 7px) / 2) !important;
-    width: calc((100% - 7px) / 2) !important;
-    max-width: calc((100% - 7px) / 2) !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    align-self: flex-start !important;
-    padding: 7px 8px !important;
-    box-sizing: border-box;
-  }
-  /* Keep two or more tiles aligned, with no artificially forced vertical space. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:not(:only-child) {
-    min-height: 0 !important;
-    height: auto !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child .aisw-tile-value {
-    overflow-wrap: anywhere !important;
-    white-space: normal !important;
-  }
-  /* FINAL shared tile sizing. Overrides earlier width:0/flex rules. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child {
-    flex: 0 1 auto !important;
-    width: fit-content !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    align-self: flex-start !important;
-    padding: 7px 9px !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child .aisw-tile-value {
-    overflow-wrap: anywhere;
-    white-space: normal !important;
-  }
-  /* The single-tile card should not be wider than needed, but remain readable. */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child {
-    min-width: min(135px, 100%) !important;
-  }
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:not(:only-child) {
-    flex: 1 1 0 !important;
-    width: 0 !important;
-    min-height: 0 !important;
-    height: auto !important;
-    align-self: stretch !important;
-  }
-  /* Completed order fulfillment: fixed presentation, independent of API action cards. */
-  .ai-summary-widget .aisw-completed-fulfillment { margin-top: 12px; }
-  .ai-summary-widget .aisw-completed-fulfillment .aisw-section-header-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    margin-bottom: 10px;
-  }
-  .ai-summary-widget .aisw-completed-fulfillment .aisw-section-heading { margin: 0; }
-  .ai-summary-widget .aisw-completed-pill {
-    display: inline-flex; align-items: center; flex: 0 0 auto;
-    background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857;
-    border-radius: 999px; padding: 4px 8px; font-size: 10px; font-weight: 800;
-    white-space: nowrap;
-  }
-  .ai-summary-widget .aisw-completed-card {
-    display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px;
-    background: #fff; border: 1px solid #cbd5e1; border-left: 4px solid #059669;
-    border-radius: 8px; box-shadow: 0 2px 5px rgba(15,23,42,.06);
-  }
-  .ai-summary-widget .aisw-completed-check {
-    display: inline-flex; justify-content: center; align-items: center;
-    flex: 0 0 25px; width: 25px; height: 25px; border-radius: 50%;
-    background: #10b981; color: #fff; font-size: 17px; font-weight: 800;
-  }
-  .ai-summary-widget .aisw-completed-content { flex: 1 1 auto; min-width: 0; }
-  .ai-summary-widget .aisw-completed-kicker {
-    font-size: 10px; line-height: 1.3; font-weight: 800; color: #64748b;
-    margin-bottom: 4px;
-  }
-  .ai-summary-widget .aisw-completed-message {
-    font-size: 12px; font-weight: 650; line-height: 1.45; color: #1e293b;
-    overflow-wrap: anywhere;
-  }
-  .ai-summary-widget .aisw-completed-footer {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px;
-  }
-  .ai-summary-widget .aisw-completed-status-label {
-    font-size: 11px; font-weight: 700; color: #64748b;
-  }
-  .ai-summary-widget .aisw-completed-status-chip {
-    display: inline-flex; align-items: center; border: 1px solid #a7f3d0;
-    background: #ecfdf5; color: #047857; border-radius: 999px;
-    padding: 4px 8px; font-size: 10px; font-weight: 700;
-  }
-  .ai-summary-widget .aisw-completed-footer {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px;
-  }
-  .ai-summary-widget .aisw-completed-status-label {
-    font-size: 11px; font-weight: 700; color: #64748b;
-  }
-  .ai-summary-widget .aisw-completed-status-chip {
-    display: inline-flex; align-items: center; border: 1px solid #a7f3d0;
-    background: #ecfdf5; color: #047857; border-radius: 999px;
-    padding: 4px 8px; font-size: 10px; font-weight: 700;
-  }
-  /* Tile labels read as written ("Existing Speed"), never upper-cased by the portal theme */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-label {
-    text-transform: none !important;
-    letter-spacing: 0 !important;
-    font-size: 11px;
-  }
-  /* Multi-value tiles (e.g. speed + TN changing together): every value the same size */
-  .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-lines {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    .aisw-tile-line {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      min-width: 0;
-    }
-    .aisw-tile-line-label {
-      flex: 0 0 34px;
-      font-size: 10px;
-      font-weight: 600;
-      opacity: 0.75;
-    }
-    /* Smaller than a single value so speed + TN both fit in full (never "573-296-...") */
-    .aisw-tile-value.font-line {
-      font-size: 12px !important;
-      font-weight: 800 !important;
-      line-height: 1.3 !important;
-      white-space: nowrap !important;
-      letter-spacing: 0 !important;
-    }
-  }
-
-  /* ---------------- Skeleton loader (first load + refresh) ----------------
-    Wraps the real card classes, so only the placeholder bars are styled here.
-    Bars are translucent, so they take the tint of whichever card they sit in. */
-  .ai-summary-widget .aisw-skeleton {
-    --skel-base: rgba(15, 23, 42, 0.07);
-    --skel-shine: rgba(255, 255, 255, 0.65);
-
-    .aisw-sr-only {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      overflow: hidden;
-      clip: rect(0 0 0 0);
-      white-space: nowrap;
-    }
-    .aisw-skel {
-      display: block;
-      flex-shrink: 0;
-      height: 10px;
-      border-radius: 5px;
-      background-color: var(--skel-base);
-      background-image: linear-gradient(
-        90deg,
-        transparent 0%,
-        var(--skel-shine) 50%,
-        transparent 100%
-      );
-      background-size: 200% 100%;
-      background-repeat: no-repeat;
-      animation: aisw-skel-shimmer 1.4s ease-in-out infinite;
-    }
-    .aisw-skel-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .aisw-skel-line {
-      margin-bottom: 7px;
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-    .w-30 { width: 30%; }
-    .w-40 { width: 40%; }
-    .w-45 { width: 45%; }
-    .w-55 { width: 55%; }
-    .w-60 { width: 60%; }
-    .w-70 { width: 70%; }
-    .w-95 { width: 95%; }
-    .w-100 { width: 100%; }
-
-    /* Scenario card */
-    .aisw-skel-head {
-      margin-bottom: 10px;
-    }
-    .aisw-skel-title {
-      height: 16px;
-      width: 45%;
-      margin-right: auto;
-    }
-    .aisw-skel-pill {
-      height: 18px;
-      width: 92px;
-      border-radius: 999px;
-    }
-    .aisw-skel-pill-sm {
-      width: 54px;
-    }
-    .aisw-scenario-card > .aisw-skel-line.w-70 {
-      margin-bottom: 12px;
-    }
-    .aisw-scenario-card .aisw-tiles-row {
-      margin-bottom: 12px !important;
-    }
-    .aisw-tile {
-      gap: 8px;
-      min-height: 74px !important;
-    }
-    .aisw-skel-label {
-      height: 9px;
-      width: 58%;
-    }
-    .aisw-skel-value {
-      height: 22px;
-      width: 82%;
-      border-radius: 6px;
-    }
-    .aisw-tile-arrow-bubble {
-      opacity: 0.45;
-    }
-
-    /* Service address banner */
-    .aisw-banner {
-      align-items: center;
-      min-height: 36px;
-      .aisw-skel-line {
-        margin-bottom: 0;
-      }
-    }
-
-    /* Products */
-    .aisw-skel-heading {
-      height: 12px;
-      width: 120px;
-      margin-bottom: 9px;
-    }
-    .aisw-prod-card-header .aisw-skel-line {
+    margin-bottom: 6px;
+    &:last-child {
       margin-bottom: 0;
     }
-    .aisw-prod-row {
-      min-height: 42px;
-      .aisw-skel-line {
-        margin-bottom: 0;
+    .aisw-case-left {
+      .aisw-case-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-main);
+      }
+      .aisw-case-subtext {
+        font-size: 11px;
+        color: var(--text-muted);
+        margin-top: 2px;
       }
     }
-    .aisw-skel-icon {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
+    .aisw-case-right {
+      font-size: 11px;
+      font-weight: 600;
+      color: #475569;
+      background: #f1f5f9;
+      padding: 2px 6px;
+      border-radius: 4px;
     }
+  }
+}
+/* ---------------- Radar Pulse Animation for Health Badges ---------------- */
+.aisw-status-badge.badge-success .aisw-status-dot,
+.aisw-status-dot.dot-success {
+  background-color: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: health-pulse-green 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+.aisw-status-badge.badge-danger .aisw-status-dot,
+.aisw-status-dot.dot-danger {
+  background-color: #dc2626;
+  box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.8);
+  animation: health-pulse-red 1.3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+.aisw-status-badge.badge-warning .aisw-status-dot,
+.aisw-status-dot.dot-warning {
+  background-color: #d97706;
+  box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
+  animation: health-pulse-amber 1.6s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes health-pulse-green {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(22, 163, 74, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(22, 163, 74, 0);
+  }
+}
+@keyframes health-pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.8);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+  }
+}
+@keyframes health-pulse-amber {
+  0% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(217, 119, 6, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(217, 119, 6, 0);
+  }
+}
+/* ---------------- Section Header Row ---------------- */
+.aisw-section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  .aisw-section-heading {
+    margin-bottom: 0 !important;
+  }
+}
+.aisw-directive-pill {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+  padding: 2.5px 8px;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.directive-pill-auto {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
+}
+.directive-pill-manual {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.directive-pill-critical {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.directive-pill-completed {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.directive-pill-danger {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+.directive-pill-warning {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+.directive-pill-success {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.directive-pill-neutral {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.directive-pill-info {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+/* ---------------- Next Action Directive Card (minimal, themed) ---------------- */
+.action-directive-card {
+  --t-bg: #f3f7ff;
+  --t-border: #bfdbfe;
+  --t-icon-bg: #dbeafe;
+  --t-icon: #2563eb;
+  --t-title: #0f172a;
+  --t-divider: #dbe5f5;
+  background: var(--t-bg);
+  border: 1px solid var(--t-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  &.theme-danger {
+    --t-bg: #fef6f6;
+    --t-border: #fecaca;
+    --t-icon-bg: #fee2e2;
+    --t-icon: #dc2626;
+    --t-divider: #f8d4d4;
+  }
+  &.theme-warning {
+    --t-bg: #fffbeb;
+    --t-border: #fde68a;
+    --t-icon-bg: #fef3c7;
+    --t-icon: #d97706;
+    --t-divider: #f6e7b0;
+  }
+  &.theme-success {
+    --t-bg: #f2fcf6;
+    --t-border: #bbf7d0;
+    --t-icon-bg: #dcfce7;
+    --t-icon: #16a34a;
+    --t-divider: #cdeedb;
+  }
+  &.theme-neutral {
+    --t-bg: #f8fafc;
+    --t-border: #e2e8f0;
+    --t-icon-bg: #e2e8f0;
+    --t-icon: #475569;
+    --t-divider: #e2e8f0;
+  }
+}
+.directive-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.directive-icon-circle {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--t-icon-bg);
+  color: var(--t-icon);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    width: 15px;
+    height: 15px;
+  }
+}
+.directive-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--t-title);
+}
+.directive-instruction {
+  margin-top: 8px;
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #475569;
+}
+.directive-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--t-border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+}
+.directive-meta-label {
+  font-weight: 600;
+  color: #64748b;
+  flex-shrink: 0;
+}
+.directive-owner-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #ffffff;
+  border: 1px solid var(--t-border);
+  color: var(--t-icon);
+}
+.directive-owner-icon {
+  font-size: 12px;
+}
+/* Alignment correction: same-width tiles, centered arrow, no overlapping text. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  min-height: 72px;
+  height: auto;
+  box-sizing: border-box;
+  align-self: stretch;
+  overflow: hidden;
+  padding: 10px 9px;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-label,
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-value,
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-sub {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-value.font-tn {
+  font-size: 12px !important;
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  margin: auto -9px;
+  box-sizing: border-box;
+  align-self: center;
+  position: relative;
+  z-index: 2;
+}
+/* Final layout: due date and status on the SAME line as the scenario title. */
+.ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-scenario-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.3;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-header-right {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  min-width: 0;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-due-date-chip {
+  padding: 3px 6px;
+  gap: 4px;
+  font-size: 10px;
+  line-height: 1.3;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-status-badge {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-scenario-subtitle {
+  clear: both;
+}
+/* Two equal boxes, fixed-size arrow between them. No negative margins or overlap. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 7px;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
+  flex: 1 1 0;
+  width: auto;
+  min-width: 0;
+  min-height: 74px;
+  height: auto;
+  align-self: stretch;
+  box-sizing: border-box;
+  overflow: visible;
+  padding: 10px 9px;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  align-self: center;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-label,
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-value,
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-sub {
+  overflow-wrap: anywhere;
+  word-break: normal;
+  white-space: normal !important;
+}
+/* Responsive scenario header: title never collides with date/status. */
+.ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start !important;
+  column-gap: 7px;
+  row-gap: 5px;
+  margin-bottom: 10px;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-scenario-title {
+  min-width: 0 !important;
+  max-width: 100%;
+  white-space: normal !important;
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.3;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 4px;
+  min-width: 0;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-due-date-chip {
+  font-size: 9px;
+  padding: 3px 5px;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-status-badge {
+  font-size: 9px;
+  padding: 3px 5px;
+}
+@media (max-width: 345px) {
+  .ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .ai-summary-widget .aisw-scenario-card .aisw-header-right {
+    justify-content: flex-start;
+  }
+}
+/* Uniform tiles for all scenarios, including multi-product installations. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
+  display: flex !important;
+  align-items: stretch !important;
+  flex-wrap: nowrap !important;
+  gap: 7px !important;
+  width: 100%;
+  min-width: 0;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
+  flex: 1 1 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  min-height: 74px;
+  height: auto !important;
+  padding: 9px 8px !important;
+  box-sizing: border-box;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tile-value,
+.ai-summary-widget .aisw-scenario-card .aisw-tile-sub {
+  max-width: 100%;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
+  white-space: normal !important;
+}
+/* Shared content-driven layout for ALL order scenarios. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  align-items: stretch !important;
+  gap: 7px !important;
+  margin-bottom: 10px !important;
+  min-width: 0;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile {
+  flex: 1 1 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  margin: 0 !important;
+  padding: 7px 8px !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  overflow-wrap: anywhere;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row .aisw-tile-label {
+  margin: 0 0 3px !important;
+  line-height: 1.2 !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row .aisw-tile-value {
+  margin: 0 !important;
+  line-height: 1.25 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row .aisw-tile-sub {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile-arrow-bubble {
+  flex: 0 0 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  align-self: center !important;
+  margin: 0 !important;
+}
+/* Independent requested details: equal, content-sized boxes without a comparison arrow. */
+.ai-summary-widget .aisw-scenario-card .aisw-requested-details {
+  display: flex !important;
+  gap: 7px !important;
+  align-items: stretch !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-requested-details > .aisw-tile {
+  flex: 1 1 0 !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 8px 9px !important;
+}
+/* Single requested value: do not stretch a lone tile across the entire row.
+Two available values still share the row equally. Applies to all matching scenarios. */
+.ai-summary-widget .aisw-scenario-card .aisw-requested-details > .aisw-tile:only-child {
+  flex: 0 1 calc((100% - 7px) / 2) !important;
+  width: calc((100% - 7px) / 2) !important;
+  max-width: calc((100% - 7px) / 2) !important;
+  min-width: 0 !important;
+  box-sizing: border-box;
+}
+/* Shared single-tile sizing: applies to Disconnection, Restoration,
+Suspension, Resumption, Move, and every other scenario. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child {
+  flex: 0 0 calc((100% - 7px) / 2) !important;
+  width: calc((100% - 7px) / 2) !important;
+  max-width: calc((100% - 7px) / 2) !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: flex-start !important;
+  padding: 7px 8px !important;
+  box-sizing: border-box;
+}
+/* Keep two or more tiles aligned, with no artificially forced vertical space. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:not(:only-child) {
+  min-height: 0 !important;
+  height: auto !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child .aisw-tile-value {
+  overflow-wrap: anywhere !important;
+  white-space: normal !important;
+}
+/* FINAL shared tile sizing. Overrides earlier width:0/flex rules. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child {
+  flex: 0 1 auto !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: flex-start !important;
+  padding: 7px 9px !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child .aisw-tile-value {
+  overflow-wrap: anywhere;
+  white-space: normal !important;
+}
+/* The single-tile card should not be wider than needed, but remain readable. */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:only-child {
+  min-width: min(135px, 100%) !important;
+}
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile:not(:only-child) {
+  flex: 1 1 0 !important;
+  width: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  align-self: stretch !important;
+}
+/* Completed order fulfillment: fixed presentation, independent of API action cards. */
+.ai-summary-widget .aisw-completed-fulfillment { margin-top: 12px; }
+.ai-summary-widget .aisw-completed-fulfillment .aisw-section-header-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-bottom: 10px;
+}
+.ai-summary-widget .aisw-completed-fulfillment .aisw-section-heading { margin: 0; }
+.ai-summary-widget .aisw-completed-pill {
+  display: inline-flex; align-items: center; flex: 0 0 auto;
+  background: #ecfdf5; border: 1px solid #a7f3d0; color: #047857;
+  border-radius: 999px; padding: 4px 8px; font-size: 10px; font-weight: 800;
+  white-space: nowrap;
+}
+.ai-summary-widget .aisw-completed-card {
+  display: flex; align-items: flex-start; gap: 12px; padding: 14px 12px;
+  background: #fff; border: 1px solid #cbd5e1; border-left: 4px solid #059669;
+  border-radius: 8px; box-shadow: 0 2px 5px rgba(15,23,42,.06);
+}
+.ai-summary-widget .aisw-completed-check {
+  display: inline-flex; justify-content: center; align-items: center;
+  flex: 0 0 25px; width: 25px; height: 25px; border-radius: 50%;
+  background: #10b981; color: #fff; font-size: 17px; font-weight: 800;
+}
+.ai-summary-widget .aisw-completed-content { flex: 1 1 auto; min-width: 0; }
+.ai-summary-widget .aisw-completed-kicker {
+  font-size: 10px; line-height: 1.3; font-weight: 800; color: #64748b;
+  margin-bottom: 4px;
+}
+.ai-summary-widget .aisw-completed-message {
+  font-size: 12px; font-weight: 650; line-height: 1.45; color: #1e293b;
+  overflow-wrap: anywhere;
+}
+.ai-summary-widget .aisw-completed-footer {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px;
+}
+.ai-summary-widget .aisw-completed-status-label {
+  font-size: 11px; font-weight: 700; color: #64748b;
+}
+.ai-summary-widget .aisw-completed-status-chip {
+  display: inline-flex; align-items: center; border: 1px solid #a7f3d0;
+  background: #ecfdf5; color: #047857; border-radius: 999px;
+  padding: 4px 8px; font-size: 10px; font-weight: 700;
+}
+.ai-summary-widget .aisw-completed-footer {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 12px;
+}
+.ai-summary-widget .aisw-completed-status-label {
+  font-size: 11px; font-weight: 700; color: #64748b;
+}
+.ai-summary-widget .aisw-completed-status-chip {
+  display: inline-flex; align-items: center; border: 1px solid #a7f3d0;
+  background: #ecfdf5; color: #047857; border-radius: 999px;
+  padding: 4px 8px; font-size: 10px; font-weight: 700;
+}
+/* Tile labels read as written ("Existing Speed"), never upper-cased by the portal theme */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-label {
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+  font-size: 11px;
+}
+/* Multi-value tiles (e.g. speed + TN changing together): every value the same size */
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  .aisw-tile-line {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
+  .aisw-tile-line-label {
+    flex: 0 0 34px;
+    font-size: 10px;
+    font-weight: 600;
+    opacity: 0.75;
+  }
+  /* Smaller than a single value so speed + TN both fit in full (never "573-296-...") */
+  .aisw-tile-value.font-line {
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0 !important;
+  }
+}
 
-    /* Next action */
-    .aisw-section-header-row {
-      margin-bottom: 8px;
-      .aisw-skel-heading {
-        margin-bottom: 0;
-      }
-    }
-    .action-directive-card .aisw-skel-row {
-      margin-bottom: 12px;
-    }
-    .aisw-skel-circle {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-lines .aisw-tile-value.font-line.tn-value{
+  white-space: nowrap !important;
+}
+
+/* ---------------- Skeleton loader (first load + refresh) ----------------
+Wraps the real card classes, so only the placeholder bars are styled here.
+Bars are translucent, so they take the tint of whichever card they sit in. */
+.ai-summary-widget .aisw-skeleton {
+  --skel-base: rgba(15, 23, 42, 0.07);
+  --skel-shine: rgba(255, 255, 255, 0.65);
+
+  .aisw-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .aisw-skel {
+    display: block;
+    flex-shrink: 0;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--skel-base);
+    background-image: linear-gradient(
+      90deg,
+      transparent 0%,
+      var(--skel-shine) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    background-repeat: no-repeat;
+    animation: aisw-skel-shimmer 1.4s ease-in-out infinite;
+  }
+  .aisw-skel-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .aisw-skel-line {
+    margin-bottom: 7px;
+    &:last-child {
+      margin-bottom: 0;
     }
   }
-  @keyframes aisw-skel-shimmer {
-    0% {
-      background-position: 150% 0;
-    }
-    100% {
-      background-position: -50% 0;
+  .w-30 { width: 30%; }
+  .w-40 { width: 40%; }
+  .w-45 { width: 45%; }
+  .w-55 { width: 55%; }
+  .w-60 { width: 60%; }
+  .w-70 { width: 70%; }
+  .w-95 { width: 95%; }
+  .w-100 { width: 100%; }
+
+  /* Scenario card */
+  .aisw-skel-head {
+    margin-bottom: 10px;
+  }
+  .aisw-skel-title {
+    height: 16px;
+    width: 45%;
+    margin-right: auto;
+  }
+  .aisw-skel-pill {
+    height: 18px;
+    width: 92px;
+    border-radius: 999px;
+  }
+  .aisw-skel-pill-sm {
+    width: 54px;
+  }
+  .aisw-scenario-card > .aisw-skel-line.w-70 {
+    margin-bottom: 12px;
+  }
+  .aisw-scenario-card .aisw-tiles-row {
+    margin-bottom: 12px !important;
+  }
+  .aisw-tile {
+    gap: 8px;
+    min-height: 74px !important;
+  }
+  .aisw-skel-label {
+    height: 9px;
+    width: 58%;
+  }
+  .aisw-skel-value {
+    height: 22px;
+    width: 82%;
+    border-radius: 6px;
+  }
+  .aisw-tile-arrow-bubble {
+    opacity: 0.45;
+  }
+
+  /* Service address banner */
+  .aisw-banner {
+    align-items: center;
+    min-height: 36px;
+    .aisw-skel-line {
+      margin-bottom: 0;
     }
   }
-  @media (prefers-reduced-motion: reduce) {
-    .ai-summary-widget .aisw-skeleton .aisw-skel {
-      animation: none;
-      background-image: none;
+
+  /* Products */
+  .aisw-skel-heading {
+    height: 12px;
+    width: 120px;
+    margin-bottom: 9px;
+  }
+  .aisw-prod-card-header .aisw-skel-line {
+    margin-bottom: 0;
+  }
+  .aisw-prod-row {
+    min-height: 42px;
+    .aisw-skel-line {
+      margin-bottom: 0;
     }
   }
+  .aisw-skel-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+  }
+
+  /* Next action */
+  .aisw-section-header-row {
+    margin-bottom: 8px;
+    .aisw-skel-heading {
+      margin-bottom: 0;
+    }
+  }
+  .action-directive-card .aisw-skel-row {
+    margin-bottom: 12px;
+  }
+  .aisw-skel-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+  }
+}
+@keyframes aisw-skel-shimmer {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-summary-widget .aisw-skeleton .aisw-skel {
+    animation: none;
+    background-image: none;
+  }
+}
 
 /* Single full-width card (profile `single: true`, e.g. Service to Disconnect).
-   Scoped to .aisw-tiles-single so the shared :only-child sizing stays as is. */
+Scoped to .aisw-tiles-single so the shared :only-child sizing stays as is. */
 .ai-summary-widget .aisw-scenario-card .aisw-tiles-row.aisw-tiles-single > .aisw-tile:only-child {
   flex: 1 1 100% !important;
   width: 100% !important;
@@ -1726,7 +1728,6 @@
     font-size: 13px !important;
     font-weight: 800 !important;
     min-width: 0 !important;
-    white-space: normal !important;
     overflow-wrap: break-word !important;
     word-break: normal !important;
   }
@@ -1739,3 +1740,31 @@
     font-weight: 600 !important;
   }
 }
+
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-lines.aisw-tile-stacked {
+  gap: 8px !important;
+  .aisw-tile-line {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 1px !important;
+  }
+  .aisw-tile-line-label {
+    flex: none !important;
+    width: auto !important;
+    font-size: 10px !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    opacity: 0.8;
+    white-space: normal !important;
+  }
+  .aisw-tile-value.font-line {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+}
+

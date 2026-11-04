@@ -230,7 +230,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                     multiLabel: "Existing",
                     lines: [
                         { label: "Speed", value: SPEED_FROM, optional: true },
-                        { label: "TN", value: TN_FROM, font: "tn", optional: true, when: "tnChanged" },
+                        { label: "TN", value: TN_FROM, font: "tn", optional: true, when: "tnSwapped" },
                     ],
                 },
                 {
@@ -238,7 +238,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                     multiLabel: "Requested",
                     lines: [
                         { label: "Speed", value: SPEED_TO, optional: true },
-                        { label: "TN", value: TN_TO, font: "tn", optional: true, when: "tnChanged" },
+                        { label: "TN", value: TN_TO, font: "tn", optional: true, when: "tnSwapped" },
                     ],
                     sub: "to_technology",
                     tone: "to",
@@ -317,6 +317,21 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             cards: CURRENT_SERVICE_CARDS,
             minCards: 2,
         },
+        PRODUCT_ADD: {
+            title: "Requested Services",
+            cards: CURRENT_SERVICE_CARDS,
+            minCards: 2,
+        },
+        PRODUCT_REMOVE: {
+            title: "Requested Services",
+            cards: CURRENT_SERVICE_CARDS,
+            minCards: 2,
+        },
+        BNOW_TO_STDBULK: {
+            title: "Requested Services",
+            cards: CURRENT_SERVICE_CARDS,
+            minCards: 2,
+        },
         DISCONNECT: disconnectProfile("Services to Disconnect", "Service to Disconnect"),
         PORT_OUT: disconnectProfile("Services to Port Out", "Service to Port Out"),
         SUSPEND: serviceStatusProfile("Suspended Services", "disco"),
@@ -336,6 +351,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                     return {
                         label: changes.length === 1 ? label + " " + changes[0].label : label,
                         multiLabel: label,
+                        stack: true,
                         lines: changes.map(function(ch) {
                             return { label: ch.label, value: { text: ch[key] || "" }, font: "compact", optional: true };
                         }),
@@ -491,6 +507,8 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         // Disconnects are checked before New Install: the 622 payload can set
         // has_tech_install on any order type.
         { profile: "PORT_OUT", when: ["isPortOut"] },
+        { profile: "DISCONNECT", when: ["isDisconnect"] },
+        { profile: "PRODUCT_CHANGE", when: ["isDisconnectOrRemoval", "isChangeOrder"] },
         { profile: "DISCONNECT", when: ["isDisconnectOrRemoval"] },
         { profile: "NEW_INSTALL", when: ["isNewInstall"] },
         { profile: "ADD_SERVICES", when: ["hasAddedServices", "!isAccountAction"] },
@@ -535,6 +553,11 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             var b = speedToMbps(sc.to_speed || sc.requested_speed);
             return a !== null && b !== null && a !== b;
         },
+        tnSwapped: function(o, sc) {
+            var a = digitsOnly(sc.from_tn || sc.existing_tn);
+            var b = digitsOnly(sc.to_tn || sc.requested_tn);
+            return !!a && !!b && a !== b;
+        },
         tnChanged: function(o, sc) {
             var a = digitsOnly(sc.from_tn || sc.existing_tn);
             var b = digitsOnly(sc.to_tn || sc.requested_tn);
@@ -545,6 +568,9 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         isDisconnectOrRemoval: function(o, sc) {
             return c.isDisconnect() || nonEmpty(sc.disconnected_services).length > 0;
+        },
+        isChangeOrder: function(o, sc) {
+            return /\b(change|modify)\b/i.test(o.orderAction || sc.order_action || "");
         },
         isAccountAction: function() {
             return ["SUSPEND", "PAUSE", "RESTORE", "RESUME", "BILLING_ONLY"].indexOf(c.actionKey()) > -1;
@@ -681,6 +707,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             tone: card.tone || "from",
             font: card.font || "",
             lines: null,
+            stack: card.stack === true,
         };
         if (card.lines) {
             var lines = buildLines(card, o, sc);
