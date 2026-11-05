@@ -144,9 +144,23 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     var TN_FROM = { from: ["from_tn", "existing_tn"], format: "tn" };
     var TN_TO = { from: ["to_tn", "requested_tn"], format: "tn" };
     var CURRENT_SERVICE_CARDS = [
-        { label: "Current Speed", value: SPEED_FROM.concat(SPEED_TO), font: "tn", tone: "to", optional: true, hideEmpty: true },
+        {
+            label: "Current Service",
+            lines: [
+                { label: "Speed", value: SPEED_FROM.concat(SPEED_TO), optional: true, hideEmpty: true },
+                { label: "TN", value: { from: ["from_tn", "existing_tn", "to_tn", "requested_tn"], format: "tn" }, optional: true, hideEmpty: true },
+            ],
+            singleLineLabel: true,
+            stack: true,
+            font: "tn",
+            tone: "to",
+        },
         { label: "Service ID", value: "service_instance_id", font: "tn", tone: "to", optional: true, hideEmpty: true },
     ];
+
+    function currentServiceProfile() {
+        return { title: "Requested Services", cards: CURRENT_SERVICE_CARDS, minCards: 2 };
+    }
 
     // Disconnects: one full-width card naming the service being removed.
     function disconnectProfile(title, label) {
@@ -307,31 +321,11 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             ],
         },
         // Added / changed products are listed in the Products section
-        ADD_SERVICES: {
-            title: "Requested Services",
-            cards: CURRENT_SERVICE_CARDS,
-            minCards: 2,
-        },
-        PRODUCT_CHANGE: {
-            title: "Requested Services",
-            cards: CURRENT_SERVICE_CARDS,
-            minCards: 2,
-        },
-        PRODUCT_ADD: {
-            title: "Requested Services",
-            cards: CURRENT_SERVICE_CARDS,
-            minCards: 2,
-        },
-        PRODUCT_REMOVE: {
-            title: "Requested Services",
-            cards: CURRENT_SERVICE_CARDS,
-            minCards: 2,
-        },
-        BNOW_TO_STDBULK: {
-            title: "Requested Services",
-            cards: CURRENT_SERVICE_CARDS,
-            minCards: 2,
-        },
+        ADD_SERVICES: currentServiceProfile(),
+        PRODUCT_CHANGE: currentServiceProfile(),
+        PRODUCT_ADD: currentServiceProfile(),
+        PRODUCT_REMOVE: currentServiceProfile(),
+        BNOW_TO_STDBULK: currentServiceProfile(),
         DISCONNECT: disconnectProfile("Services to Disconnect", "Service to Disconnect"),
         PORT_OUT: disconnectProfile("Services to Port Out", "Service to Port Out"),
         SUSPEND: serviceStatusProfile("Suspended Services", "disco"),
@@ -684,7 +678,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
 
     // card.lines -> visible lines [{ label, value, font, missing }]
     function buildLines(card, o, sc) {
-        return card.lines
+        var lines = card.lines
             .filter(function(line) {
                 return !line.when || predicatePasses(line.when, o, sc);
             })
@@ -695,8 +689,16 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                     value: value || "—",
                     font: line.font || card.font || "",
                     missing: !value && !line.optional,
+                    empty: !value,
+                    hideEmpty: line.hideEmpty === true,
                 };
             });
+        var anyFilled = lines.some(function(l) {
+            return !l.empty;
+        });
+        return anyFilled ? lines.filter(function(l) {
+            return !(l.empty && l.hideEmpty);
+        }) : lines;
     }
 
     // Card spec -> tile model { label, value, lines, sub, tone, font, missing }
@@ -718,6 +720,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 tile.label = card.multiLabel || card.label;
                 tile.lines = lines;
             } else if (lines.length === 1) {
+                if (card.singleLineLabel) tile.label = lines[0].label;
                 tile.value = lines[0].value;
                 tile.font = lines[0].font;
             } else {
