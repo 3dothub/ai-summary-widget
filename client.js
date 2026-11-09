@@ -190,6 +190,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 },
             ],
             singleLineLabel: true,
+            plainLines: true,
             stack: true,
             font: "tn",
             tone: "to",
@@ -234,6 +235,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                         },
                     ],
                     singleLineLabel: true,
+                    plainLines: true,
                     stack: true,
                     font: "tn",
                     tone: "disco",
@@ -953,7 +955,8 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 return l.missing;
             });
             if (lines.length > 1) {
-                tile.label = card.multiLabel || card.label;
+                tile.label = card.plainLines ? "" : (card.multiLabel || card.label);
+                tile.plain = card.plainLines === true;
                 tile.lines = lines;
             } else if (lines.length === 1) {
                 if (card.singleLineLabel) tile.label = lines[0].label;
