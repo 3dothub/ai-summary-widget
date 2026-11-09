@@ -5,7 +5,7 @@
           ng-click="c.togglePanel()"
           aria-label="Show AI Summary"
           title="{{c.state.loading ? 'Loading summary...' : 'Show AI Summary'}}"
-          >
+  >
     <span class="aisw-toggle-icon">&#10022;</span>
     <span class="aisw-toggle-label">AI Summary</span>
   </button>
@@ -19,7 +19,7 @@
           ng-click="c.togglePanel()"
           aria-label="Hide AI Summary"
           title="Hide AI Summary"
-          >
+  >
     <span class="aisw-toggle-icon">&#10022;</span>
     <span class="aisw-toggle-label">AI Summary</span>
   </button>
@@ -31,8 +31,8 @@
         <div class="aisw-header-title">
           AI Order Summary
           <span class="aisw-header-order-badge" ng-if="c.data.order.orderNo"
-                >{{c.data.order.orderNo}}</span
-            >
+          >{{c.data.order.orderNo}}</span
+          >
         </div>
       </div>
       <div class="aisw-header-actions">
@@ -43,12 +43,12 @@
                 ng-disabled="c.state.loading"
                 title="Refresh summary"
                 aria-label="Refresh summary"
-                >
+        >
           <span
-                class="aisw-btn-icon"
-                ng-class="{'is-spinning': c.state.loading}"
-                ng-bind-html="c.icon('refresh')"
-                ></span>
+                  class="aisw-btn-icon"
+                  ng-class="{'is-spinning': c.state.loading}"
+                  ng-bind-html="c.icon('refresh')"
+          ></span>
         </button>
         <button
                 type="button"
@@ -57,29 +57,35 @@
                 ng-disabled="c.state.loading"
                 title="Close summary"
                 aria-label="Close summary"
-                >
+        >
           <span class="aisw-btn-icon" ng-bind-html="c.icon('cancel')"></span>
         </button>
       </div>
     </div>
     <!-- ================= Panel Scrollable Body ================= -->
-    <div class="aisw-content">
-      <!-- Error State Alert -->
-      <div
-           class="aisw-callout tone-danger"
-           ng-if="!c.state.loading && !c.data.order && c.data.errorMessage"
-           >
-        <span
-              class="aisw-callout-icon"
-              ng-bind-html="c.icon('alert-circle')"
-              ></span>
-        <div class="aisw-callout-body">
-          <div class="aisw-callout-title">Summary unavailable</div>
-          <div class="aisw-callout-text">{{c.data.errorMessage}}</div>
+    <div class="aisw-content"
+         ng-class="{'aisw-content-error': c.state.apiFailed && !c.state.loading}">
+      <!-- API Failure State: only shown when the summary request fails -->
+      <div class="aisw-exception-view"
+           ng-if="!c.state.loading && c.state.apiFailed"
+           role="alert"
+           aria-labelledby="aisw-exception-title">
+        <div class="aisw-exception-icon" aria-hidden="true">
+          <span ng-bind-html="c.icon('alert-triangle')"></span>
         </div>
+        <h3 id="aisw-exception-title" class="aisw-exception-title">AI Summary Unavailable</h3>
+        <p class="aisw-exception-message">Unable to load the order summary.</p>
+        <button type="button"
+                class="aisw-exception-retry"
+                ng-click="c.retrySummary()"
+                ng-disabled="c.state.loading"
+                aria-label="Try loading the AI Summary again">
+          <span class="aisw-exception-retry-icon" ng-bind-html="c.icon('refresh')" aria-hidden="true"></span>
+          <span>Try Again</span>
+        </button>
       </div>
       <!-- Skeleton (first load + refresh). Reuses the real card classes so sizes match the loaded view. -->
-      <div class="aisw-skeleton" ng-if="c.isLoadingView()" role="status" aria-live="polite" aria-busy="true">
+      <div class="aisw-skeleton" ng-if="c.isLoadingView() && !c.state.apiFailed" role="status" aria-live="polite" aria-busy="true">
         <!-- 1. Scenario card -->
         <div class="aisw-scenario-card">
           <div class="aisw-skel-row aisw-skel-head">
@@ -141,7 +147,7 @@
         </div>
       </div>
       <!-- Main Order View (Rendered when data arrives) -->
-      <div ng-if="c.data.order && !c.isLoadingView()">
+      <div ng-if="c.data.order && !c.isLoadingView() && !c.state.apiFailed">
         <!-- ================= 1. Dynamic Scenario Callout Card ================= -->
         <div class="aisw-scenario-card">
           <div class="aisw-scenario-header">
@@ -158,6 +164,10 @@
               </span>
             </div>
           </div>
+          <div class="aisw-install-type-chip" ng-if="c.data.order.installationType" style="color: #1d4ed8;">
+             <span class="aisw-install-type-icon" aria-hidden="true" ng-bind-html="c.installTypeIcon(c.data.order.installationType)"></span>
+             <span class="aisw-install-type-text" style="color: #1d4ed8;">{{c.data.order.installationType}}</span>
+          </div>	
           <p class="aisw-scenario-subtitle">
             {{c.data.order.scenarioSubtitle}}
           </p>
@@ -207,9 +217,9 @@
           </div>
           <!-- Narrative Paragraph -->
           <p
-             class="aisw-scenario-narrative"
-             ng-bind-html="c.formattedSummary()"
-             ></p>
+                  class="aisw-scenario-narrative"
+                  ng-bind-html="c.formattedSummary()"
+          ></p>
         </div>
         <!-- ================= 2. Service Address Banner ================= -->
         <div class="aisw-banner" ng-if="c.data.order.serviceAddress">
@@ -222,69 +232,69 @@
           <h5 class="aisw-section-heading">Products in Order</h5>
           <!-- Existing / Outgoing Services -->
           <div
-               class="aisw-prod-card prod-card-existing"
-               ng-if="c.existingProducts().length > 0"
-               >
+                  class="aisw-prod-card prod-card-existing"
+                  ng-if="c.existingProducts().length > 0"
+          >
             <div class="aisw-prod-card-header">
               <span class="aisw-prod-card-title">{{c.existingTitle()}}</span>
               <!-- RESTORED: existing status badge (from API) -->
               <span class="aisw-prod-badge aisw-existing-status" ng-if="c.existingBadge().text" ng-class="'badge-' + c.existingBadge().tone"
-                    >{{c.existingBadge().text}}</span
-                >
+              >{{c.existingBadge().text}}</span
+              >
             </div>
             <div class="aisw-prod-list">
               <div class="aisw-prod-row" ng-repeat="p in c.existingProducts() track by $index">
                 <span
-                      class="aisw-prod-icon-badge"
-                      ng-class="c.productBadgeClass(p)"
-                      ng-bind-html="c.productIcon(p)"
-                      ></span>
+                        class="aisw-prod-icon-badge"
+                        ng-class="c.productBadgeClass(p)"
+                        ng-bind-html="c.productIcon(p)"
+                ></span>
                 <span class="aisw-prod-name">{{p}}</span>
               </div>
             </div>
           </div>
           <!-- Requested Services (title + badge vary by order action) -->
           <div
-               class="aisw-prod-card prod-card-requested"
-               ng-if="c.requestedProducts().length > 0"
-               >
+                  class="aisw-prod-card prod-card-requested"
+                  ng-if="c.requestedProducts().length > 0"
+          >
             <div class="aisw-prod-card-header">
               <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
               <!-- RESTORED: requested status badge (from API) -->
               <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
-                    >{{c.requestedBadge().text}}</span
-                >
+              >{{c.requestedBadge().text}}</span
+              >
             </div>
             <div class="aisw-prod-list">
               <div class="aisw-prod-row" ng-repeat="p in c.requestedProducts() track by $index">
                 <span
-                      class="aisw-prod-icon-badge"
-                      ng-class="c.productBadgeClass(p)"
-                      ng-bind-html="c.productIcon(p)"
-                      ></span>
+                        class="aisw-prod-icon-badge"
+                        ng-class="c.productBadgeClass(p)"
+                        ng-bind-html="c.productIcon(p)"
+                ></span>
                 <span class="aisw-prod-name">{{p}}</span>
               </div>
             </div>
           </div>
           <!-- Fallback: Services on Order -->
           <div
-               class="aisw-prod-card prod-card-requested"
-               ng-if="c.existingProducts().length === 0 && c.requestedProducts().length === 0 && c.otherOrderProducts().length > 0"
-               >
+                  class="aisw-prod-card prod-card-requested"
+                  ng-if="c.existingProducts().length === 0 && c.requestedProducts().length === 0 && c.otherOrderProducts().length > 0"
+          >
             <div class="aisw-prod-card-header">
               <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
               <!-- RESTORED: fallback badge -->
               <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
-                    >{{c.requestedBadge().text}}</span
-                >
+              >{{c.requestedBadge().text}}</span
+              >
             </div>
             <div class="aisw-prod-list">
               <div class="aisw-prod-row" ng-repeat="p in c.otherOrderProducts() track by $index">
                 <span
-                      class="aisw-prod-icon-badge"
-                      ng-class="c.productBadgeClass(p)"
-                      ng-bind-html="c.productIcon(p)"
-                      ></span>
+                        class="aisw-prod-icon-badge"
+                        ng-class="c.productBadgeClass(p)"
+                        ng-bind-html="c.productIcon(p)"
+                ></span>
                 <span class="aisw-prod-name">{{p}}</span>
               </div>
             </div>
@@ -292,21 +302,21 @@
         </div>
         <!-- ================= 4. Ownership & Operational Routing ================= -->
         <div
-             class="aisw-card-section"
-             ng-if="c.data.order.caseOwnership && c.data.order.caseOwnership.length > 0"
-             >
+                class="aisw-card-section"
+                ng-if="c.data.order.caseOwnership && c.data.order.caseOwnership.length > 0"
+        >
           <h5 class="aisw-section-heading">Ownership &amp; Operational Routing</h5>
           <div
-               class="aisw-case-row"
-               ng-repeat="item in c.data.order.caseOwnership track by $index"
-               >
+                  class="aisw-case-row"
+                  ng-repeat="item in c.data.order.caseOwnership track by $index"
+          >
             <div class="aisw-case-left">
               <div class="aisw-case-title">
                 <span ng-if="item.isRouting">Routing &middot; </span>
                 <span ng-if="!item.isRouting">Case &middot; </span>
                 <span class="aisw-link" ng-if="item.case_sys_id" ng-click="c.openCase(item)"
-                      >{{item.case_number}}</span
-                  >
+                >{{item.case_number}}</span
+                >
                 <span class="font-semibold" ng-if="!item.case_sys_id">{{item.case_number}}</span>
               </div>
               <div class="aisw-case-subtext">
@@ -337,22 +347,22 @@
         </div>
         <!-- ================= 5. Next Actions ================= -->
         <div
-             class="aisw-card-section"
-             ng-if="!c.isCompleted() && c.data.order.criticalNextActions && c.data.order.criticalNextActions.length > 0"
-             >
+                class="aisw-card-section"
+                ng-if="!c.isCompleted() && c.data.order.criticalNextActions && c.data.order.criticalNextActions.length > 0"
+        >
           <div class="aisw-section-header-row">
             <h5 class="aisw-section-heading">{{ c.nextActionHeading() }}</h5>
             <span
-                  class="aisw-directive-pill"
-                  ng-class="c.actionPill(c.data.order.criticalNextActions[0]).cls"
-                  >{{ c.actionPill(c.data.order.criticalNextActions[0]).text }}</span
-              >
+                    class="aisw-directive-pill"
+                    ng-class="c.actionPill(c.data.order.criticalNextActions[0]).cls"
+            >{{ c.actionPill(c.data.order.criticalNextActions[0]).text }}</span
+            >
           </div>
           <div
-               class="action-directive-card"
-               ng-repeat="act in c.data.order.criticalNextActions track by $index"
-               ng-class="'theme-' + c.actionTheme(act)"
-               >
+                  class="action-directive-card"
+                  ng-repeat="act in c.data.order.criticalNextActions track by $index"
+                  ng-class="'theme-' + c.actionTheme(act)"
+          >
             <div class="directive-head">
               <div class="directive-icon-circle" ng-bind-html="c.actionIcon(act)"></div>
               <div class="directive-title">{{ act.title || act.instruction }}</div>

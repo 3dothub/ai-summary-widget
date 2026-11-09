@@ -64,6 +64,25 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         }
         return prodSvgCache[key];
     };
+    var INSTALL_TYPE_SVGS = {
+        // Isometric 3D solid package (matching the design screenshot)
+        self_install: '<path d="M3 7l8.445-4.645a1 1 0 0 1 .91 0L21 7l-9 5-9-5zm-1 3.208V17a1 1 0 0 0 .555.894L11 22.18V12l-9-5-1 3.208zM13 22.18l8.445-4.286A1 1 0 0 0 22 17v-6.792l-9 5v6.972z"/>',
+        // Angled solid technician tool
+        tech_install: '<path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>'
+    };
+    var installSvgCache = {};
+    c.installTypeIcon = function(type) {
+        var t = String(type || "").toLowerCase();
+        var key = t.indexOf("tech") > -1 ? "tech_install" : "self_install";
+        if (!installSvgCache[key]) {
+            installSvgCache[key] = $sce.trustAsHtml(
+                '<svg viewBox="0 0 24 24" fill="#1d4ed8" aria-hidden="true">' +
+                INSTALL_TYPE_SVGS[key] +
+                "</svg>"
+            );
+        }
+        return installSvgCache[key];
+    };
     c.formatTN = function(raw) {
         if (!raw) return "";
         var s = (raw + "").replace(/\D/g, "");
@@ -138,55 +157,128 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     //
     // Which profile is used: PROFILE_RULES first, then c.actionKey().
     var NO_CARDS = [];
-    var REQUESTED_DETAIL = ["to_speed", "requested_speed", { from: ["to_tn", "requested_tn"], format: "tn" }];
+    var REQUESTED_DETAIL = ["to_speed", "requested_speed", {
+        from: ["to_tn", "requested_tn"],
+        format: "tn"
+    }];
     var SPEED_FROM = ["from_speed", "existing_speed"];
     var SPEED_TO = ["to_speed", "requested_speed"];
-    var TN_FROM = { from: ["from_tn", "existing_tn"], format: "tn" };
-    var TN_TO = { from: ["to_tn", "requested_tn"], format: "tn" };
-    var CURRENT_SERVICE_CARDS = [
-        {
+    var TN_FROM = {
+        from: ["from_tn", "existing_tn"],
+        format: "tn"
+    };
+    var TN_TO = {
+        from: ["to_tn", "requested_tn"],
+        format: "tn"
+    };
+    var CURRENT_SERVICE_CARDS = [{
             label: "Current Service",
-            lines: [
-                { label: "Speed", value: SPEED_FROM.concat(SPEED_TO), optional: true, hideEmpty: true },
-                { label: "TN", value: { from: ["from_tn", "existing_tn", "to_tn", "requested_tn"], format: "tn" }, optional: true, hideEmpty: true },
+            lines: [{
+                    label: "Speed",
+                    value: SPEED_FROM.concat(SPEED_TO),
+                    optional: true,
+                    hideEmpty: true
+                },
+                {
+                    label: "TN",
+                    value: {
+                        from: ["from_tn", "existing_tn", "to_tn", "requested_tn"],
+                        format: "tn"
+                    },
+                    optional: true,
+                    hideEmpty: true
+                },
             ],
             singleLineLabel: true,
             stack: true,
             font: "tn",
             tone: "to",
         },
-        { label: "Service ID", value: "service_instance_id", font: "tn", tone: "to", optional: true, hideEmpty: true },
+        {
+            label: "Service ID",
+            value: "service_instance_id",
+            font: "tn",
+            tone: "to",
+            optional: true,
+            hideEmpty: true
+        },
     ];
 
     function currentServiceProfile() {
-        return { title: "Requested Services", cards: CURRENT_SERVICE_CARDS, minCards: 2 };
+        return {
+            title: "Requested Services",
+            cards: CURRENT_SERVICE_CARDS,
+            minCards: 2
+        };
     }
 
-    // Disconnects: one full-width card naming the service being removed.
     function disconnectProfile(title, label) {
         return {
             title: title,
-            single: true,
             cards: [{
-                label: label,
-                value: { from: ["disconnected_services", "@existingProducts", "productsList"], format: "list" },
-                tone: "disco",
-            }],
-            // Two-card version, to add later:
-            // cards: [
-            //     { label: "Order Action", value: "@orderAction", tone: "slate", font: "compact" },
-            //     { label: "Disconnect Date", value: "dueDate", tone: "disco", font: "compact" },
-            // ],
+                    label: label,
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_FROM.concat(SPEED_TO),
+                            optional: true,
+                            hideEmpty: true
+                        },
+                        {
+                            label: "TN",
+                            value: {
+                                from: ["from_tn", "existing_tn", "to_tn", "requested_tn"],
+                                format: "tn"
+                            },
+                            optional: true,
+                            hideEmpty: true
+                        },
+                    ],
+                    singleLineLabel: true,
+                    stack: true,
+                    font: "tn",
+                    tone: "disco",
+                },
+                {
+                    label: "Service ID",
+                    value: "service_instance_id",
+                    font: "tn",
+                    tone: "disco",
+                    optional: true,
+                    hideEmpty: true
+                },
+            ],
+            minCards: 2
         };
     }
 
     function serviceStatusProfile(title, tone) {
         return {
             title: title,
-            cards: [
-                { label: "Requested TN", value: TN_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
-                { label: "Requested Speed", value: SPEED_TO, font: "tn", tone: tone, optional: true, hideEmpty: true },
-                { label: "Service ID", value: "service_instance_id", font: "tn", tone: tone, optional: true, hideEmpty: true, extra: true },
+            cards: [{
+                    label: "Requested TN",
+                    value: TN_TO,
+                    font: "tn",
+                    tone: tone,
+                    optional: true,
+                    hideEmpty: true
+                },
+                {
+                    label: "Requested Speed",
+                    value: SPEED_TO,
+                    font: "tn",
+                    tone: tone,
+                    optional: true,
+                    hideEmpty: true
+                },
+                {
+                    label: "Service ID",
+                    value: "service_instance_id",
+                    font: "tn",
+                    tone: tone,
+                    optional: true,
+                    hideEmpty: true,
+                    extra: true
+                },
             ],
             minCards: 2,
         };
@@ -195,9 +287,17 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     function moveProfile(title) {
         return {
             title: title,
-            cards: [
-                { label: "Moving From", value: "@moveFromAddress", font: "compact" },
-                { label: "Moving To", value: "@moveToAddress", tone: "to", font: "compact" },
+            cards: [{
+                    label: "Moving From",
+                    value: "@moveFromAddress",
+                    font: "compact"
+                },
+                {
+                    label: "Moving To",
+                    value: "@moveToAddress",
+                    tone: "to",
+                    font: "compact"
+                },
             ],
         };
     }
@@ -219,18 +319,40 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             compare: true,
             cards: [{
                     label: "Existing",
-                    labelFrom: ["from_technology", { text: "Copper" }],
-                    lines: [
-                        { label: "Speed", value: SPEED_FROM, optional: true },
-                        { label: "TN", value: TN_FROM, font: "tn", optional: true, when: "tnChanged" },
+                    labelFrom: ["from_technology", {
+                        text: "Copper"
+                    }],
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_FROM,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_FROM,
+                            font: "tn",
+                            optional: true,
+                            when: "tnChanged"
+                        },
                     ],
                 },
                 {
                     label: "Requested",
-                    labelFrom: ["to_technology", { text: "Fiber" }],
-                    lines: [
-                        { label: "Speed", value: SPEED_TO, optional: true },
-                        { label: "TN", value: TN_TO, font: "tn", optional: true, when: "tnChanged" },
+                    labelFrom: ["to_technology", {
+                        text: "Fiber"
+                    }],
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_TO,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_TO,
+                            font: "tn",
+                            optional: true,
+                            when: "tnChanged"
+                        },
                     ],
                     tone: "to",
                 },
@@ -242,17 +364,35 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             cards: [{
                     label: "Existing Speed",
                     multiLabel: "Existing",
-                    lines: [
-                        { label: "Speed", value: SPEED_FROM, optional: true },
-                        { label: "TN", value: TN_FROM, font: "tn", optional: true, when: "tnSwapped" },
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_FROM,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_FROM,
+                            font: "tn",
+                            optional: true,
+                            when: "tnSwapped"
+                        },
                     ],
                 },
                 {
                     label: "Requested Speed",
                     multiLabel: "Requested",
-                    lines: [
-                        { label: "Speed", value: SPEED_TO, optional: true },
-                        { label: "TN", value: TN_TO, font: "tn", optional: true, when: "tnSwapped" },
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_TO,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_TO,
+                            font: "tn",
+                            optional: true,
+                            when: "tnSwapped"
+                        },
                     ],
                     sub: "to_technology",
                     tone: "to",
@@ -264,16 +404,32 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             compare: true,
             cards: [{
                     label: "Existing",
-                    lines: [
-                        { label: "Speed", value: SPEED_FROM, optional: true },
-                        { label: "TN", value: TN_FROM, font: "tn", optional: true },
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_FROM,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_FROM,
+                            font: "tn",
+                            optional: true
+                        },
                     ],
                 },
                 {
                     label: "Requested",
-                    lines: [
-                        { label: "Speed", value: SPEED_TO, optional: true },
-                        { label: "TN", value: TN_TO, font: "tn", optional: true },
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_TO,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_TO,
+                            font: "tn",
+                            optional: true
+                        },
                     ],
                     sub: "to_technology",
                     tone: "to",
@@ -286,17 +442,35 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             cards: [{
                     label: "Existing TN",
                     multiLabel: "Existing",
-                    lines: [
-                        { label: "TN", value: TN_FROM, font: "tn", optional: true },
-                        { label: "Speed", value: SPEED_FROM, optional: true, when: "speedChanged" },
+                    lines: [{
+                            label: "TN",
+                            value: TN_FROM,
+                            font: "tn",
+                            optional: true
+                        },
+                        {
+                            label: "Speed",
+                            value: SPEED_FROM,
+                            optional: true,
+                            when: "speedChanged"
+                        },
                     ],
                 },
                 {
                     label: "Requested TN",
                     multiLabel: "Requested",
-                    lines: [
-                        { label: "TN", value: TN_TO, font: "tn", optional: true },
-                        { label: "Speed", value: SPEED_TO, optional: true, when: "speedChanged" },
+                    lines: [{
+                            label: "TN",
+                            value: TN_TO,
+                            font: "tn",
+                            optional: true
+                        },
+                        {
+                            label: "Speed",
+                            value: SPEED_TO,
+                            optional: true,
+                            when: "speedChanged"
+                        },
                     ],
                     tone: "to",
                 },
@@ -309,7 +483,10 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 {
                     label: "Installation Appointment",
                     value: "appointmentSlot",
-                    sub: { from: "dispatchStatus", prefix: "Dispatch: " },
+                    sub: {
+                        from: "dispatchStatus",
+                        prefix: "Dispatch: "
+                    },
                     tone: "amber",
                     font: "compact",
                 },
@@ -317,7 +494,13 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             // No technician visit (has_tech_install false) -> no appointment
             fallBackCards: [
                 ORDERED_SERVICE_CARD,
-                { label: "Service ID", value: "service_instance_id", font: "tn", tone: "to", optional: true },
+                {
+                    label: "Service ID",
+                    value: "service_instance_id",
+                    font: "tn",
+                    tone: "to",
+                    optional: true
+                },
             ],
         },
         // Added / changed products are listed in the Products section
@@ -341,13 +524,21 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             compare: true,
             cards: function(o) {
                 var changes = changedRecords(o);
+
                 function side(label, key, tone) {
                     return {
                         label: changes.length === 1 ? label + " " + changes[0].label : label,
                         multiLabel: label,
                         stack: true,
                         lines: changes.map(function(ch) {
-                            return { label: ch.label, value: { text: ch[key] || "" }, font: "compact", optional: true };
+                            return {
+                                label: ch.label,
+                                value: {
+                                    text: ch[key] || ""
+                                },
+                                font: "compact",
+                                optional: true
+                            };
                         }),
                         tone: tone,
                     };
@@ -491,21 +682,56 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     // PROFILE_RULES: checked top to bottom, first match wins. `when` lists
     // CARD_PREDICATES names that must all pass ("!name" negates).
     // No match -> the order's own action profile (c.actionKey()).
-    var PROFILE_RULES = [
-        { profile: "MIGRATION", when: ["isMigration"] },
-        { profile: "SERVICE_CHANGE", when: ["isServiceChange"] },
-        { profile: "SPEED_CHANGE", when: ["isSpeedChange"] },
-        { profile: "TN_CHANGE", when: ["isTnChange", "!isDisconnect"] },
-        { profile: "RECORD_CHANGE", when: ["hasRecordChanges"] },
-        { profile: "CANCELLATION", when: ["isCanceled"] },
+    var PROFILE_RULES = [{
+            profile: "MIGRATION",
+            when: ["isMigration"]
+        },
+        {
+            profile: "SERVICE_CHANGE",
+            when: ["isServiceChange"]
+        },
+        {
+            profile: "SPEED_CHANGE",
+            when: ["isSpeedChange"]
+        },
+        {
+            profile: "TN_CHANGE",
+            when: ["isTnChange", "!isDisconnect"]
+        },
+        {
+            profile: "RECORD_CHANGE",
+            when: ["hasRecordChanges"]
+        },
+        {
+            profile: "CANCELLATION",
+            when: ["isCanceled"]
+        },
         // Disconnects are checked before New Install: the 622 payload can set
         // has_tech_install on any order type.
-        { profile: "PORT_OUT", when: ["isPortOut"] },
-        { profile: "DISCONNECT", when: ["isDisconnect"] },
-        { profile: "PRODUCT_CHANGE", when: ["isDisconnectOrRemoval", "isChangeOrder"] },
-        { profile: "DISCONNECT", when: ["isDisconnectOrRemoval"] },
-        { profile: "NEW_INSTALL", when: ["isNewInstall"] },
-        { profile: "ADD_SERVICES", when: ["hasAddedServices", "!isAccountAction"] },
+        {
+            profile: "PORT_OUT",
+            when: ["isPortOut"]
+        },
+        {
+            profile: "DISCONNECT",
+            when: ["isDisconnect"]
+        },
+        {
+            profile: "PRODUCT_CHANGE",
+            when: ["isDisconnectOrRemoval", "isChangeOrder"]
+        },
+        {
+            profile: "DISCONNECT",
+            when: ["isDisconnectOrRemoval"]
+        },
+        {
+            profile: "NEW_INSTALL",
+            when: ["isNewInstall"]
+        },
+        {
+            profile: "ADD_SERVICES",
+            when: ["hasAddedServices", "!isAccountAction"]
+        },
     ];
 
     function nonEmpty(list) {
@@ -601,7 +827,9 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
 
     var CARD_FORMATS = {
         tn: function(v) {
-            return { value: c.formatTN(v) };
+            return {
+                value: c.formatTN(v)
+            };
         },
         // ["A","B","C","D"] -> "A, B" with "+2 more" as the sub line
         list: function(v) {
@@ -628,19 +856,27 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
 
     // Spec -> { value, more }; value is "" when nothing resolves
     function resolveSpec(spec, o, sc) {
-        if (!spec) return { value: "" };
+        if (!spec) return {
+            value: ""
+        };
         if (angular.isString(spec)) {
             var raw = readField(spec, o, sc);
-            return { value: hasValue(raw) ? raw : "" };
+            return {
+                value: hasValue(raw) ? raw : ""
+            };
         }
         if (angular.isArray(spec)) {
             for (var i = 0; i < spec.length; i++) {
                 var r = resolveSpec(spec[i], o, sc);
                 if (hasValue(r.value)) return r;
             }
-            return { value: "" };
+            return {
+                value: ""
+            };
         }
-        if (spec.text) return { value: spec.text };
+        if (spec.text) return {
+            value: spec.text
+        };
         var res = resolveSpec(spec.from, o, sc);
         if (hasValue(res.value) && spec.format && CARD_FORMATS[spec.format]) {
             res = CARD_FORMATS[spec.format](res.value);
@@ -769,7 +1005,12 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var build = function(cards) {
             var all = (cards || []).map(function(card, i) {
                 var tile = buildTile(card, o, sc);
-                return { card: card, tile: tile, index: i, empty: card.hideEmpty && tile.value === "—" };
+                return {
+                    card: card,
+                    tile: tile,
+                    index: i,
+                    empty: card.hideEmpty && tile.value === "—"
+                };
             });
             var main = all.filter(function(b) {
                 return !b.empty && !b.card.extra;
@@ -1118,6 +1359,8 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         collapsed: true,
         loading: false,
         loaded: false,
+        apiFailed: false,
+        errorMessage: "",
         casePage: 0,
         falloutPage: 0,
     };
@@ -1125,20 +1368,57 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     function fetchSummary(force) {
         if (c.state.loading) return;
         if (c.state.loaded && !force) return;
+
         c.data.action = "summary";
+
         c.state.loading = true;
+        c.state.apiFailed = false;
+        c.state.errorMessage = "";
         c.state.casePage = 0;
         c.state.falloutPage = 0;
+
         c.server.update().then(
             function() {
                 c.state.loading = false;
-                c.state.loaded = !!c.data.order;
+
+                // API returned an error or no usable order data
+                if (c.data.apiFailed ||
+                    c.data.errorMessage ||
+                    !c.data.order) {
+
+                    showSummaryError(
+                        c.data.errorMessage ||
+                        "We couldn't retrieve the order summary at this time."
+                    );
+                    return;
+                }
+
+                // Successful response
+                c.state.loaded = true;
+                c.state.apiFailed = false;
+                c.state.errorMessage = "";
             },
             function() {
-                c.state.loading = false;
-            },
+                showSummaryError(
+                    "Unable to connect to the AI Summary service. Please try again."
+                );
+            }
         );
     }
+
+    function showSummaryError(message) {
+        c.state.loading = false;
+        c.state.loaded = false;
+        c.state.apiFailed = true;
+        c.state.errorMessage = message;
+
+        // Keep the panel visible
+        c.state.collapsed = false;
+
+        // Do not display outdated summary cards
+        c.data.order = null;
+    }
+
 
     c.orderActionValue = function() {
         var o = c.data.order || {};
@@ -1148,7 +1428,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
 
     // Skeleton shows while a request is in flight (incl. refresh) or before the first response
     c.isLoadingView = function() {
-        return c.state.loading || (!c.data.order && !c.data.errorMessage);
+        return c.state.loading;
     };
 
     c.togglePanel = function() {
@@ -1158,6 +1438,10 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         }
     };
     c.refreshSummary = function() {
+        fetchSummary(true);
+    };
+
+    c.retrySummary = function() {
         fetchSummary(true);
     };
 
