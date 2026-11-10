@@ -83,6 +83,25 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         }
         return installSvgCache[key];
     };
+    c.formatDate = function(val) {
+        if (!val) return "";
+        var s = String(val).trim();
+        var m = s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+        if (m) {
+            var yyyy = m[1];
+            var mm = m[2].length === 1 ? "0" + m[2] : m[2];
+            var dd = m[3].length === 1 ? "0" + m[3] : m[3];
+            return mm + "/" + dd + "/" + yyyy;
+        }
+        var m2 = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+        if (m2) {
+            var mm2 = m2[1].length === 1 ? "0" + m2[1] : m2[1];
+            var dd2 = m2[2].length === 1 ? "0" + m2[2] : m2[2];
+            return mm2 + "/" + dd2 + "/" + m2[3];
+        }
+        return s;
+    };
+
     c.formatTN = function(raw) {
         if (!raw) return "";
         var s = (raw + "").replace(/\D/g, "");
@@ -97,15 +116,16 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var n = String(name).toLowerCase().trim();
         if (!n) return true;
         if (
-            /tech install|technician|installation|install waiver|waiver|install fee|one time charge|one-time charge|activation fee|dispatch fee|setup fee|shipping|discount|promotional credit/.test(n)
+            /tech install|technician|installation|install waiver|waiver|install fee|one time charge|one-time charge|activation fee|dispatch fee|setup fee|shipping|discount|promotional credit|facility relocation|subscriber line|access recovery|charge|surcharge|fee|rebate|recovery|request technician/.test(n)
         ) {
             return true;
         }
         var callingFeatures = [
-            "call forwarding", "caller id", "call waiting", "3-way calling", "three-way calling",
-            "speed call", "call return", "selective call", "anonymous call", "call trace",
+            "call forwarding", "caller id", "call waiting", "3-way calling", "three-way calling", "3 way calling",
+            "speed call", "call return", "selective call", "anonymous call", "call trace", "call reject",
             "distinctive ring", "hunting service", "voicemail", "voice mail", "non-published",
-            "unpublished number", "unlisted number", "inside wire", "wire maintenance"
+            "unpublished number", "unlisted number", "inside wire", "wire maintenance", "long distance",
+            "data calls", "blocking", "features pack"
         ];
         for (var i = 0; i < callingFeatures.length; i++) {
             if (n.indexOf(callingFeatures[i]) > -1) return true;
@@ -161,14 +181,14 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         from: ["to_tn", "requested_tn"],
         format: "tn"
     }];
-    var SPEED_FROM = ["from_speed", "existing_speed"];
-    var SPEED_TO = ["to_speed", "requested_speed"];
+    var SPEED_FROM = ["from_speed", "existing_speed", "fromSpeed"];
+    var SPEED_TO = ["to_speed", "requested_speed", "toSpeed", "speed", "u_speed"];
     var TN_FROM = {
-        from: ["from_tn", "existing_tn"],
+        from: ["from_tn", "existing_tn", "fromTN"],
         format: "tn"
     };
     var TN_TO = {
-        from: ["to_tn", "requested_tn"],
+        from: ["to_tn", "requested_tn", "toTN", "assignedTN", "u_assigned_tn", "assigned_tn"],
         format: "tn"
     };
     var CURRENT_SERVICE_CARDS = [{
@@ -190,7 +210,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 },
             ],
             singleLineLabel: true,
-            plainLines: true,
             stack: true,
             font: "tn",
             tone: "to",
@@ -213,94 +232,187 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
     }
 
+    // Disconnects: one full-width card naming the service being removed.
     function disconnectProfile(title, label) {
         return {
             title: title,
+            single: true,
             cards: [{
-                    label: label,
-                    lines: [{
-                            label: "Speed",
-                            value: SPEED_FROM.concat(SPEED_TO),
-                            optional: true,
-                            hideEmpty: true
-                        },
-                        {
-                            label: "TN",
-                            value: {
-                                from: ["from_tn", "existing_tn", "to_tn", "requested_tn"],
-                                format: "tn"
-                            },
-                            optional: true,
-                            hideEmpty: true
-                        },
-                    ],
-                    singleLineLabel: true,
-                    plainLines: true,
-                    stack: true,
-                    font: "tn",
-                    tone: "disco",
+                label: label,
+                value: {
+                    from: ["disconnected_services", "@existingProducts", "productsList"],
+                    format: "list"
                 },
-                {
-                    label: "Service ID",
-                    value: "service_instance_id",
-                    font: "tn",
-                    tone: "disco",
-                    optional: true,
-                    hideEmpty: true
-                },
-            ],
-            minCards: 2
+                tone: "disco",
+            }],
+            // Two-card version, to add later:
+            // cards: [
+            //     { label: "Order Action", value: "@orderAction", tone: "slate", font: "compact" },
+            //     { label: "Disconnect Date", value: "dueDate", tone: "disco", font: "compact" },
+            // ],
         };
     }
 
     function serviceStatusProfile(title, tone) {
         return {
             title: title,
-            cards: [{
-                    label: "Requested TN",
-                    value: TN_TO,
-                    font: "tn",
-                    tone: tone,
-                    optional: true,
-                    hideEmpty: true
-                },
-                {
-                    label: "Requested Speed",
-                    value: SPEED_TO,
-                    font: "tn",
-                    tone: tone,
-                    optional: true,
-                    hideEmpty: true
-                },
-                {
-                    label: "Service ID",
-                    value: "service_instance_id",
-                    font: "tn",
-                    tone: tone,
-                    optional: true,
-                    hideEmpty: true,
-                    extra: true
-                },
-            ],
+            cards: function(o, sc) {
+                var cards = [];
+                var speedRes = resolveSpec(SPEED_TO, o, sc);
+                var tnRes = resolveSpec(TN_TO, o, sc);
+                var sidRes = resolveSpec(["service_instance_id", "u_sid"], o, sc);
+                if (hasValue(speedRes.value)) {
+                    cards.push({
+                        label: "Requested Speed",
+                        value: SPEED_TO,
+                        font: "tn",
+                        tone: tone,
+                        optional: true,
+                    });
+                }
+                if (hasValue(tnRes.value)) {
+                    cards.push({
+                        label: "Requested TN",
+                        value: TN_TO,
+                        font: "tn",
+                        tone: tone,
+                        optional: true,
+                    });
+                } else if (hasValue(sidRes.value)) {
+                    cards.push({
+                        label: "Service ID",
+                        value: ["service_instance_id", "u_sid"],
+                        font: "tn",
+                        tone: tone,
+                        optional: true,
+                    });
+                }
+                if (cards.length === 0) {
+                    cards.push({
+                        label: "Service ID",
+                        value: ["service_instance_id", "u_sid"],
+                        font: "tn",
+                        tone: tone,
+                        optional: true,
+                    });
+                }
+                return cards;
+            },
             minCards: 2,
         };
     }
 
     function moveProfile(title) {
         return {
-            title: title,
+            title: title || "Requested Services",
+            compare: true,
             cards: [{
-                    label: "Moving From",
-                    value: "@moveFromAddress",
-                    font: "compact"
+                    label: "Existing Service",
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_FROM,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_FROM,
+                            font: "tn",
+                            optional: true
+                        },
+                    ],
                 },
                 {
-                    label: "Moving To",
-                    value: "@moveToAddress",
+                    label: "Requested Service",
+                    lines: [{
+                            label: "Speed",
+                            value: SPEED_TO,
+                            optional: true
+                        },
+                        {
+                            label: "TN",
+                            value: TN_TO,
+                            font: "tn",
+                            optional: true
+                        },
+                    ],
+                    sub: "to_technology",
+                    tone: "to",
+                },
+            ],
+        };
+    }
+
+    function productAddProfile() {
+        return {
+            title: "Requested Services",
+            cards: [{
+                    label: "Added Product(s)",
+                    value: {
+                        from: ["@requestedProducts", "added_services", "productsList"],
+                        format: "list"
+                    },
                     tone: "to",
                     font: "compact"
                 },
-            ],
+                {
+                    label: "Effective Date",
+                    value: [{ from: ["dueDate", "effective_date"], format: "date" }, {
+                        text: "Immediate"
+                    }],
+                    tone: "slate",
+                    font: "compact"
+                }
+            ]
+        };
+    }
+
+    function productDeleteProfile() {
+        return {
+            title: "Requested Services",
+            cards: [{
+                    label: "Deleted Product(s)",
+                    value: {
+                        from: ["@existingProducts", "disconnected_services", "productsList"],
+                        format: "list"
+                    },
+                    tone: "disco",
+                    font: "compact"
+                },
+                {
+                    label: "Effective Date",
+                    value: [{ from: ["dueDate", "effective_date"], format: "date" }, {
+                        text: "Immediate"
+                    }],
+                    tone: "slate",
+                    font: "compact"
+                }
+            ]
+        };
+    }
+
+    function productChangeProfile() {
+        return {
+            title: "Requested Services",
+            compare: true,
+            cards: [{
+                    label: "Deleted / Removed",
+                    value: {
+                        from: ["@existingProducts", "disconnected_services"],
+                        format: "list"
+                    },
+                    tone: "disco",
+                    font: "compact"
+                },
+                {
+                    label: "Added / Installed",
+                    value: {
+                        from: ["@requestedProducts", "added_services"],
+                        format: "list"
+                    },
+                    tone: "to",
+                    font: "compact"
+                }
+            ]
         };
     }
 
@@ -310,6 +422,67 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         value: REQUESTED_DETAIL.concat(["productsDisplay", "@orderAction"]),
         font: "compact",
     };
+
+    function orderedServiceCards(o, sc) {
+        var cards = [];
+        var speedRes = resolveSpec(SPEED_TO, o, sc);
+        var tnRes = resolveSpec(TN_TO, o, sc);
+        var sidRes = resolveSpec(["service_instance_id", "u_sid"], o, sc);
+        var apptRes = resolveSpec("appointmentSlot", o, sc);
+
+        if (hasValue(speedRes.value)) {
+            cards.push({
+                label: "Requested Speed",
+                value: SPEED_TO,
+                font: "tn",
+                tone: "to",
+                optional: true,
+            });
+        }
+        if (hasValue(tnRes.value)) {
+            cards.push({
+                label: "Requested TN",
+                value: TN_TO,
+                font: "tn",
+                tone: "to",
+                optional: true,
+            });
+        } else if (hasValue(sidRes.value)) {
+            cards.push({
+                label: "Service ID",
+                value: ["service_instance_id", "u_sid"],
+                font: "tn",
+                tone: "to",
+                optional: true,
+            });
+        }
+        if (hasValue(apptRes.value)) {
+            cards.push({
+                label: "Installation Appointment",
+                value: "appointmentSlot",
+                sub: {
+                    from: "dispatchStatus",
+                    prefix: "Dispatch: "
+                },
+                tone: "amber",
+                font: "compact",
+                optional: true,
+            });
+        }
+        if (cards.length === 0) {
+            cards.push(ORDERED_SERVICE_CARD);
+            if (hasValue(sidRes.value)) {
+                cards.push({
+                    label: "Service ID",
+                    value: ["service_instance_id", "u_sid"],
+                    font: "tn",
+                    tone: "to",
+                    optional: true,
+                });
+            }
+        }
+        return cards;
+    }
 
     var ACTION_PROFILES = {
         CANCELLATION: {
@@ -334,7 +507,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                             value: TN_FROM,
                             font: "tn",
                             optional: true,
-                            when: "tnChanged"
+                            when: "hasVoice"
                         },
                     ],
                 },
@@ -353,7 +526,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                             value: TN_TO,
                             font: "tn",
                             optional: true,
-                            when: "tnChanged"
+                            when: "hasVoice"
                         },
                     ],
                     tone: "to",
@@ -376,7 +549,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                             value: TN_FROM,
                             font: "tn",
                             optional: true,
-                            when: "tnSwapped"
+                            when: "hasVoice"
                         },
                     ],
                 },
@@ -393,7 +566,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                             value: TN_TO,
                             font: "tn",
                             optional: true,
-                            when: "tnSwapped"
+                            when: "hasVoice"
                         },
                     ],
                     sub: "to_technology",
@@ -480,37 +653,27 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         NEW_INSTALL: {
             title: "Requested Services",
-            cards: [
-                ORDERED_SERVICE_CARD,
-                {
-                    label: "Installation Appointment",
-                    value: "appointmentSlot",
-                    sub: {
-                        from: "dispatchStatus",
-                        prefix: "Dispatch: "
-                    },
-                    tone: "amber",
-                    font: "compact",
-                },
-            ],
-            // No technician visit (has_tech_install false) -> no appointment
-            fallBackCards: [
-                ORDERED_SERVICE_CARD,
-                {
-                    label: "Service ID",
-                    value: "service_instance_id",
-                    font: "tn",
-                    tone: "to",
-                    optional: true
-                },
-            ],
+            cards: function(o, sc) {
+                return orderedServiceCards(o, sc);
+            },
         },
         // Added / changed products are listed in the Products section
-        ADD_SERVICES: currentServiceProfile(),
-        PRODUCT_CHANGE: currentServiceProfile(),
-        PRODUCT_ADD: currentServiceProfile(),
-        PRODUCT_REMOVE: currentServiceProfile(),
-        BNOW_TO_STDBULK: currentServiceProfile(),
+        ADD_SERVICES: {
+            title: "Requested Services",
+            cards: function(o, sc) {
+                return orderedServiceCards(o, sc);
+            },
+        },
+        PRODUCT_CHANGE: productChangeProfile(),
+        PRODUCT_ADD: productAddProfile(),
+        PRODUCT_REMOVE: productDeleteProfile(),
+        PRODUCT_DELETE: productDeleteProfile(),
+        BNOW_TO_STDBULK: {
+            title: "Requested Services",
+            cards: function(o, sc) {
+                return orderedServiceCards(o, sc);
+            },
+        },
         DISCONNECT: disconnectProfile("Services to Disconnect", "Service to Disconnect"),
         PORT_OUT: disconnectProfile("Services to Port Out", "Service to Port Out"),
         SUSPEND: serviceStatusProfile("Suspended Services", "disco"),
@@ -550,7 +713,9 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         },
         DEFAULT: {
             title: "Requested Services",
-            cards: NO_CARDS,
+            cards: function(o, sc) {
+                return orderedServiceCards(o, sc);
+            },
         },
     };
     c.actionKey = function() {
@@ -568,7 +733,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var s = (text || "").toLowerCase();
         if (/requested|billing update/.test(s)) return "info";
         if (/suspend|paus/.test(s)) return "warning";
-        if (/disconnect|ported out|moved out|fallout|error|fail|critical/.test(s)) return "danger";
+        if (/disconnect|ported out|moved out|fallout|error|fail|critical|cease/.test(s)) return "danger";
         if (/cancel|void|reject|existing/.test(s)) return "canceled";
         if (/hold|block|pend|jeopardy|wait|risk/.test(s)) return "warning";
         if (/restor|resum|active|complet|closed|fulfil|updated|good/.test(s)) return "success";
@@ -595,31 +760,36 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var seen = {};
         return (list || []).filter(function(p) {
             if (p === null || p === undefined) return false;
-            var key = String(p).trim();
-            if (!key || c.isInstallOrFee(key) || seen[key]) return false;
+            var name = typeof p === "object" ? (p.name || p.product_name || p.productName || "") : String(p);
+            var key = String(name).trim();
+            if (!key || c.isChildFeatureOrFee(key) || seen[key]) return false;
             seen[key] = true;
             return true;
+        }).map(function(p) {
+            return typeof p === "object" ? (p.name || p.product_name || p.productName || "") : p;
         });
     }
     c.existingProducts = function() {
         var g = groups();
-        if (g) return (g.existing && g.existing.items) || [];
-        var sc = (c.data.order && c.data.order.scenario) || {};
-        return uniqueProducts(
-            sc.existing_products && sc.existing_products.length ?
-            sc.existing_products :
-            sc.disconnected_services,
-        );
+        var rawList = (g && g.existing && g.existing.items) || [];
+        if (!rawList.length) {
+            var sc = (c.data.order && c.data.order.scenario) || {};
+            rawList = sc.existing_products && sc.existing_products.length ?
+                sc.existing_products :
+                sc.disconnected_services;
+        }
+        return uniqueProducts(rawList);
     };
     c.requestedProducts = function() {
         var g = groups();
-        if (g) return (g.requested && g.requested.items) || [];
-        var sc = (c.data.order && c.data.order.scenario) || {};
-        return uniqueProducts(
-            sc.requested_products && sc.requested_products.length ?
-            sc.requested_products :
-            sc.added_services,
-        );
+        var rawList = (g && g.requested && g.requested.items) || [];
+        if (!rawList.length) {
+            var sc = (c.data.order && c.data.order.scenario) || {};
+            rawList = sc.requested_products && sc.requested_products.length ?
+                sc.requested_products :
+                sc.added_services;
+        }
+        return uniqueProducts(rawList);
     };
     c.otherOrderProducts = function() {
         // API product groups present → show only those, never the generic list
@@ -638,16 +808,31 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         );
     };
     c.requestedTitle = function() {
+        if (c.isMove()) return "To Service Address";
+        if (c.data.order && (c.data.order.scenarioType === "PRODUCT_ADD" || (c.data.order.scenario && c.data.order.scenario.scenario_type === "PRODUCT_ADD"))) {
+            return "Added Services";
+        }
         return c.actionProfile().title;
     };
     c.existingTitle = function() {
+        if (c.isMove()) return "From Service Address";
+        if (c.data.order && (c.data.order.scenarioType === "PRODUCT_DELETE" || c.data.order.scenarioType === "PRODUCT_REMOVE" || (c.data.order.scenario && (c.data.order.scenario.scenario_type === "PRODUCT_DELETE" || c.data.order.scenario.scenario_type === "PRODUCT_REMOVE")))) {
+            return "Deleted Services";
+        }
         return c.actionKey() === "FROM" ? c.actionProfile().title : "Existing Services";
     };
     c.requestedBadge = function() {
-        return groupBadge((groups() || {}).requested);
+        var b = groupBadge((groups() || {}).requested);
+        if (!b.text && c.isMove()) return { text: 'Installing', tone: 'info' };
+        return b;
     };
     c.existingBadge = function() {
-        return groupBadge((groups() || {}).existing);
+        if (c.isMove() && c.isCanceled()) {
+            return { text: "Active", tone: "success" };
+        }
+        var b = groupBadge((groups() || {}).existing);
+        if (!b.text && c.isMove()) return { text: "Active", tone: "success" };
+        return b;
     };
     // ---------------- Scenario helpers ----------------
     c.isDisconnect = function() {
@@ -659,18 +844,21 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     };
     c.isMove = function() {
         var o = c.data.order;
-        return !!o && o.scenarioType === "MOVE" && !c.isDisconnect();
+        if (!o) return false;
+        var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
+        var act = (o.orderAction || (o.scenario && o.scenario.order_action) || "").toLowerCase();
+        return scType === "MOVE" || act === "move" || /move/i.test(act);
     };
 
     c.moveFromAddress = function() {
         var o = c.data.order || {};
         var sc = o.scenario || {};
-        return sc.from_address || (c.actionKey() === "FROM" ? o.serviceAddress : "") || "";
+        return o.fromServiceAddress || o.from_service_address || sc.from_service_address || sc.from_address || (c.actionKey() === "FROM" ? o.serviceAddress : "") || "";
     };
     c.moveToAddress = function() {
         var o = c.data.order || {};
         var sc = o.scenario || {};
-        return sc.to_address || (c.actionKey() === "TO" ? o.serviceAddress : "") || "";
+        return o.toServiceAddress || o.to_service_address || sc.to_service_address || sc.to_address || (c.actionKey() === "TO" ? o.serviceAddress : "") || o.serviceAddress || "";
     };
     c.moveDateLabel = function() {
         var key = c.actionKey();
@@ -699,6 +887,18 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         {
             profile: "TN_CHANGE",
             when: ["isTnChange", "!isDisconnect"]
+        },
+        {
+            profile: "MOVE",
+            when: ["isMove"]
+        },
+        {
+            profile: "PRODUCT_ADD",
+            when: ["isProductAdd"]
+        },
+        {
+            profile: "PRODUCT_DELETE",
+            when: ["isProductDelete"]
         },
         {
             profile: "RECORD_CHANGE",
@@ -749,6 +949,17 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         isDisconnect: function() {
             return c.isDisconnect();
         },
+        isMove: function(o, sc) {
+            return c.isMove();
+        },
+        isProductAdd: function(o, sc) {
+            var t = (o.scenarioType || (sc && sc.scenario_type) || "").toUpperCase();
+            return t === "PRODUCT_ADD";
+        },
+        isProductDelete: function(o, sc) {
+            var t = (o.scenarioType || (sc && sc.scenario_type) || "").toUpperCase();
+            return t === "PRODUCT_DELETE" || t === "PRODUCT_REMOVE";
+        },
         isMigration: function(o, sc) {
             return o.scenarioType === "MIGRATION" || sc.is_migration === true;
         },
@@ -779,6 +990,18 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             var a = digitsOnly(sc.from_tn || sc.existing_tn);
             var b = digitsOnly(sc.to_tn || sc.requested_tn);
             return !!a && !!b && a !== b;
+        },
+        hasVoice: function(o, sc) {
+            if (sc && (sc.from_tn || sc.to_tn || sc.existing_tn || sc.requested_tn)) return true;
+            if (o && (o.assignedTN || o.requestedTN || o.fromTN || o.toTN || o.u_assigned_tn)) return true;
+            var services = ((sc && sc.added_services) || []).concat((sc && sc.disconnected_services) || []);
+            for (var i = 0; i < services.length; i++) {
+                var s = String(services[i] || "").toLowerCase();
+                if (s.indexOf("voice") > -1 || s.indexOf("phone") > -1 || s.indexOf("line") > -1 || s.indexOf("pots") > -1) {
+                    return true;
+                }
+            }
+            return false;
         },
         tnChanged: function(o, sc) {
             var a = digitsOnly(sc.from_tn || sc.existing_tn);
@@ -831,6 +1054,11 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         tn: function(v) {
             return {
                 value: c.formatTN(v)
+            };
+        },
+        date: function(v) {
+            return {
+                value: c.formatDate(v)
             };
         },
         // ["A","B","C","D"] -> "A, B" with "+2 more" as the sub line
@@ -924,7 +1152,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 var value = toText(resolveSpec(line.value, o, sc).value);
                 return {
                     label: line.label,
-                    value: value || "—",
+                    value: value || "-",
                     font: line.font || card.font || "",
                     missing: !value && !line.optional,
                     empty: !value,
@@ -955,20 +1183,19 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 return l.missing;
             });
             if (lines.length > 1) {
-                tile.label = card.plainLines ? "" : (card.multiLabel || card.label);
-                tile.plain = card.plainLines === true;
+                tile.label = card.multiLabel || card.label;
                 tile.lines = lines;
             } else if (lines.length === 1) {
                 if (card.singleLineLabel) tile.label = lines[0].label;
                 tile.value = lines[0].value;
                 tile.font = lines[0].font;
             } else {
-                tile.value = "—";
+                tile.value = "-";
             }
         } else {
             var main = resolveSpec(card.value, o, sc);
             var value = toText(main.value);
-            tile.value = value || "—";
+            tile.value = value || "-";
             tile.sub = tile.sub || main.more || "";
             tile.missing = !value && !card.optional;
         }
@@ -1012,7 +1239,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                     card: card,
                     tile: tile,
                     index: i,
-                    empty: card.hideEmpty && tile.value === "—"
+                    empty: card.hideEmpty && (tile.value === "—" || tile.value === "-")
                 };
             });
             var main = all.filter(function(b) {
@@ -1079,8 +1306,8 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             tone: "info"
         };
         var hs = (o.healthStatus || "").toLowerCase();
-        var st = (o.u_state || o.state || "").toLowerCase();
-        if (st.indexOf("hold") > -1 || hs === "risk") {
+        var st = (o.u_state || o.state || o.order_status || o.orderStatus || "").toLowerCase();
+        if (st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold()) {
             return {
                 text: "Risk",
                 tone: "warning"
@@ -1295,17 +1522,32 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return $sce.trustAsHtml(escapeHtml(s));
     };
     // ---------------- Panel state & data ----------------
+    var ON_HOLD_FLAGS = [
+        { key: "u_bsw_delayed", label: "BSW Delayed" },
+        { key: "u_ows_hold", label: "OWS(Other Working Service)" },
+        { key: "u_vmdu", label: "VMDU" },
+        { key: "u_lnp_port_fallout", label: "LNP Porting Failure" },
+        { key: "u_pre_provisioning_fallout", label: "Pre-Provisioning Fallout" },
+        { key: "u_bsw_delay_predicted", label: "BSW Delay Predicted" }
+    ];
     c.getOnHoldReason = function() {
         var order = c.data.order;
         if (!order) return "";
-        return order.onHoldReason || (order.scenario && order.scenario.on_hold_reason) || "";
+        var sc = order.scenario || {};
+        for (var i = 0; i < ON_HOLD_FLAGS.length; i++) {
+            var k = ON_HOLD_FLAGS[i].key;
+            var val = order[k] !== undefined ? order[k] : sc[k];
+            if (val === true || val === 1 || String(val).toLowerCase() === "true" || String(val).toLowerCase() === "yes" || String(val) === "1") {
+                return ON_HOLD_FLAGS[i].label;
+            }
+        }
+        return order.onHoldReason || order.on_hold_reason || sc.onHoldReason || sc.on_hold_reason || order.u_reason_for_jeopardy || sc.u_reason_for_jeopardy || "";
     };
     c.isOnHold = function() {
         var order = c.data.order;
         if (!order) return false;
-        var st = (order.u_state || "").toLowerCase();
-        var hs = (order.healthStatus || "").toLowerCase();
-        return st.indexOf("hold") > -1 || hs === "risk" || !!c.getOnHoldReason();
+        var st = (order.u_state || order.state || order.order_status || order.orderStatus || "").toLowerCase();
+        return st.indexOf("hold") > -1 || !!c.getOnHoldReason();
     };
     c.isCanceled = function() {
         var order = c.data.order;

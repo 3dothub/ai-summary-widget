@@ -155,19 +155,19 @@
             <div class="aisw-header-right">
               <span class="aisw-due-date-chip" ng-if="c.data.order.dueDate">
                 <span class="aisw-due-date-icon" aria-hidden="true">&#128197;</span>
-                <span>Due: {{c.data.order.dueDate}}</span>
+                <span>Due: {{c.formatDate(c.data.order.dueDate) || c.data.order.dueDate}}</span>
               </span>
-              <!-- RESTORED: health status badge -->
-              <span class="aisw-status-badge" ng-class="'badge-' + c.healthBadge().tone">
+              <!-- RESTORED: health status badge (hidden when on hold with dedicated reason callout) -->
+              <span class="aisw-status-badge" ng-class="'badge-' + c.healthBadge().tone" ng-if="!c.isOnHold() || !c.getOnHoldReason()">
                 <span class="aisw-status-dot" ng-class="'dot-' + c.healthBadge().tone"></span>
                 {{c.healthBadge().text}}
               </span>
             </div>
           </div>
           <div class="aisw-install-type-chip" ng-if="c.data.order.installationType" style="color: #1d4ed8;">
-             <span class="aisw-install-type-icon" aria-hidden="true" ng-bind-html="c.installTypeIcon(c.data.order.installationType)"></span>
-             <span class="aisw-install-type-text" style="color: #1d4ed8;">{{c.data.order.installationType}}</span>
-          </div>	
+            <span class="aisw-install-type-icon" aria-hidden="true" ng-bind-html="c.installTypeIcon(c.data.order.installationType)"></span>
+            <span class="aisw-install-type-text" style="color: #1d4ed8;">{{c.data.order.installationType}}</span>
+          </div>
           <p class="aisw-scenario-subtitle">
             {{c.data.order.scenarioSubtitle}}
           </p>
@@ -202,13 +202,13 @@
           <div class="aisw-tiles-row" ng-if="c.cards" ng-class="{'aisw-tiles-single': c.cards.single}" data-case="{{c.cards.caseId}}">
             <div ng-repeat-start="t in c.cards.tiles track by $index"
                  class="aisw-tile" ng-class="'tile-' + t.tone">
-              <span class="aisw-tile-label" ng-if="t.label">{{t.label}}</span>
+              <span class="aisw-tile-label">{{t.label}}</span>
               <div class="aisw-tile-value" ng-if="!t.lines" ng-class="t.font ? 'font-' + t.font : ''">{{t.value}}</div>
               <!-- Several values changing together (e.g. speed + TN): same size for every line -->
               <div class="aisw-tile-lines" ng-if="t.lines" ng-class="{'aisw-tile-stacked': t.stack}">
                 <div class="aisw-tile-line" ng-repeat="l in t.lines track by $index">
-                  <span ng-class="t.plain ? 'aisw-tile-label' : 'aisw-tile-line-label'">{{l.label}}</span>
-                  <span class="aisw-tile-value" ng-class="{'font-tn': t.plain, 'font-line': !t.plain, 'tn-value': !t.plain && l.label === 'TN'}">{{l.value}}</span>
+                  <span class="aisw-tile-line-label">{{l.label}}</span>
+                  <span class="aisw-tile-value font-line" ng-class="{'tn-value': l.label === 'TN'}">{{l.value}}</span>
                 </div>
               </div>
               <span class="aisw-tile-sub" ng-if="t.sub">{{t.sub}}</span>
@@ -222,7 +222,34 @@
           ></p>
         </div>
         <!-- ================= 2. Service Address Banner ================= -->
-        <div class="aisw-banner" ng-if="c.data.order.serviceAddress">
+        <!-- Move Order: Dual From -> To Address Banner -->
+        <div class="aisw-banner aisw-banner-move" ng-if="c.isMove() && (c.moveFromAddress() || c.moveToAddress())">
+          <div class="aisw-banner-move-row aisw-banner-move-from" ng-if="c.moveFromAddress()">
+            <span class="aisw-banner-icon" aria-hidden="true">&#128205;</span>
+            <div class="aisw-banner-move-details">
+              <div class="aisw-banner-label-row">
+                <span class="aisw-banner-label">From Service Address:</span>
+                </div>
+              <span class="aisw-banner-text">{{c.moveFromAddress()}}</span>
+            </div>
+          </div>
+          <div class="aisw-banner-move-divider" ng-if="c.moveFromAddress() && c.moveToAddress()">
+            <span class="aisw-banner-move-divider-line"></span>
+            <span class="aisw-banner-move-divider-arrow">&darr;</span>
+            <span class="aisw-banner-move-divider-line"></span>
+          </div>
+          <div class="aisw-banner-move-row aisw-banner-move-to" ng-if="c.moveToAddress()">
+            <span class="aisw-banner-icon aisw-banner-icon-dest" aria-hidden="true">&#128205;</span>
+            <div class="aisw-banner-move-details">
+              <div class="aisw-banner-label-row">
+                <span class="aisw-banner-label">To Service Address:</span>
+                </div>
+              <span class="aisw-banner-text">{{c.moveToAddress()}}</span>
+            </div>
+          </div>
+        </div>
+        <!-- Standard Service Address Banner -->
+        <div class="aisw-banner" ng-if="(!c.isMove() || (!c.moveFromAddress() && !c.moveToAddress())) && c.data.order.serviceAddress">
           <span class="aisw-banner-icon" aria-hidden="true">&#128205;</span>
           <span class="aisw-banner-label">Service Address:</span>
           <span class="aisw-banner-text">{{c.data.order.serviceAddress}}</span>
