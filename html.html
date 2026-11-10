@@ -198,9 +198,8 @@
               </div>
             </div>
           </div>
-          <!-- Existing -> Requested cards. Cards per order action come from ACTION_PROFILES in client.js. -->
-          <div class="aisw-tiles-row" ng-if="c.cards" ng-class="{'aisw-tiles-single': c.cards.single}" data-case="{{c.cards.caseId}}">
-            <div ng-repeat-start="t in c.cards.tiles track by $index"
+          <div class="aisw-tiles-row" ng-if="c.data.order.cards" ng-class="{'aisw-tiles-single': c.data.order.cards.single}" data-case="{{c.data.order.cards.caseId}}">
+            <div ng-repeat-start="t in c.data.order.cards.tiles track by $index"
                  class="aisw-tile" ng-class="'tile-' + t.tone">
               <span class="aisw-tile-label">{{t.label}}</span>
               <div class="aisw-tile-value" ng-if="!t.lines" ng-class="t.font ? 'font-' + t.font : ''">{{t.value}}</div>
@@ -213,7 +212,7 @@
               </div>
               <span class="aisw-tile-sub" ng-if="t.sub">{{t.sub}}</span>
             </div>
-            <div ng-repeat-end class="aisw-tile-arrow-bubble" ng-if="c.cards.arrow && !$last">&rarr;</div>
+            <div ng-repeat-end class="aisw-tile-arrow-bubble" ng-if="c.data.order.cards.arrow && !$last">&rarr;</div>
           </div>
           <!-- Narrative Paragraph -->
           <p
