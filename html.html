@@ -338,9 +338,9 @@
             </div>
             <div class="directive-instruction" ng-if="act.title">{{ act.instruction }}</div>
             <!-- RESTORED: owner when action required, status otherwise -->
-            <div class="directive-footer">
-              <span class="directive-meta-label" ng-if="!c.isCompleted() && act.action_required">Action Owner:</span>
-              <span class="directive-owner-chip" ng-if="!c.isCompleted() && act.action_required">
+            <div class="directive-footer" ng-if="!c.isCompleted() && act.action_required">
+              <span class="directive-meta-label">Action Owner:</span>
+              <span class="directive-owner-chip">
                 <span class="directive-owner-icon">&#128100;</span>{{ c.responsibleParty(act) }}
               </span>
             </div>
