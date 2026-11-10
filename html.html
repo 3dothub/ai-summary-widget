@@ -254,74 +254,17 @@
           <span class="aisw-banner-text">{{c.data.order.serviceAddress}}</span>
         </div>
         <!-- ================= 3. Products in Order ================= -->
-        <div class="aisw-products-section" ng-if="c.hasProducts()">
+        <div class="aisw-products-section" ng-if="c.data.order.productSections.length">
           <h5 class="aisw-section-heading">Products in Order</h5>
-          <!-- Existing / Outgoing Services -->
-          <div
-                  class="aisw-prod-card prod-card-existing"
-                  ng-if="c.existingProducts().length > 0"
-          >
+          <div class="aisw-prod-card" ng-class="'prod-card-' + section.kind" ng-repeat="section in c.data.order.productSections track by section.id">
             <div class="aisw-prod-card-header">
-              <span class="aisw-prod-card-title">{{c.existingTitle()}}</span>
-              <!-- RESTORED: existing status badge (from API) -->
-              <span class="aisw-prod-badge aisw-existing-status" ng-if="c.existingBadge().text" ng-class="'badge-' + c.existingBadge().tone"
-              >{{c.existingBadge().text}}</span
-              >
+              <span class="aisw-prod-card-title">{{section.title}}</span>
+              <span class="aisw-prod-badge badge-{{section.badge.tone}}" ng-if="section.badge" ng-class="{'aisw-existing-status': section.kind === 'existing'}">{{section.badge.text}}</span>
             </div>
             <div class="aisw-prod-list">
-              <div class="aisw-prod-row" ng-repeat="p in c.existingProducts() track by $index">
-                <span
-                        class="aisw-prod-icon-badge"
-                        ng-class="c.productBadgeClass(p)"
-                        ng-bind-html="c.productIcon(p)"
-                ></span>
-                <span class="aisw-prod-name">{{p}}</span>
-              </div>
-            </div>
-          </div>
-          <!-- Requested Services (title + badge vary by order action) -->
-          <div
-                  class="aisw-prod-card prod-card-requested"
-                  ng-if="c.requestedProducts().length > 0"
-          >
-            <div class="aisw-prod-card-header">
-              <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
-              <!-- RESTORED: requested status badge (from API) -->
-              <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
-              >{{c.requestedBadge().text}}</span
-              >
-            </div>
-            <div class="aisw-prod-list">
-              <div class="aisw-prod-row" ng-repeat="p in c.requestedProducts() track by $index">
-                <span
-                        class="aisw-prod-icon-badge"
-                        ng-class="c.productBadgeClass(p)"
-                        ng-bind-html="c.productIcon(p)"
-                ></span>
-                <span class="aisw-prod-name">{{p}}</span>
-              </div>
-            </div>
-          </div>
-          <!-- Fallback: Services on Order -->
-          <div
-                  class="aisw-prod-card prod-card-requested"
-                  ng-if="c.existingProducts().length === 0 && c.requestedProducts().length === 0 && c.otherOrderProducts().length > 0"
-          >
-            <div class="aisw-prod-card-header">
-              <span class="aisw-prod-card-title">{{c.requestedTitle()}}</span>
-              <!-- RESTORED: fallback badge -->
-              <span class="aisw-prod-badge" ng-if="c.requestedBadge().text" ng-class="'badge-' + c.requestedBadge().tone"
-              >{{c.requestedBadge().text}}</span
-              >
-            </div>
-            <div class="aisw-prod-list">
-              <div class="aisw-prod-row" ng-repeat="p in c.otherOrderProducts() track by $index">
-                <span
-                        class="aisw-prod-icon-badge"
-                        ng-class="c.productBadgeClass(p)"
-                        ng-bind-html="c.productIcon(p)"
-                ></span>
-                <span class="aisw-prod-name">{{p}}</span>
+              <div class="aisw-prod-row" ng-repeat="item in section.items track by $index">
+                <span class="aisw-prod-icon-badge" ng-class="'badge-icon-' + item.icon" ng-bind-html="c.productIcon(item.icon)"></span>
+                <span class="aisw-prod-name">{{item.name}}</span>
               </div>
             </div>
           </div>

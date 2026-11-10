@@ -29,31 +29,15 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     };
     // ---------------- Product SVGs ----------------
     var PRODUCT_SVGS = {
-        fiber: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3m-3.5-6.5l-2.1 2.1m-8.8 8.8l-2.1 2.1m0-13l2.1 2.1m8.8 8.8l2.1 2.1"/>',
         voice: '<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>',
         wifi: '<path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>',
         tv: '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/>',
-        dsl: '<rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="7" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="17" cy="12" r="1.5"/><path d="M7 18v2m10-2v2"/>',
         wireless: '<path d="M12 20h.01M18 10a7 7 0 0 1 0 10M6 10a7 7 0 0 0 0 10M21 7a11 11 0 0 1 0 16M3 7a11 11 0 0 0 0 16M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>',
         default: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
     };
     var prodSvgCache = {};
 
-    function getProdKey(name) {
-        var n = (name || "").toString().toLowerCase();
-        if (/voice|phone|line|pots|metro-cat|residence|voip/.test(n)) return "voice";
-        if (/fiber|gpon|xgs|gig|500m|2g|1g/.test(n)) return "wifi";
-        if (/wifi|wi-fi|router|modem|gateway/.test(n)) return "wifi";
-        if (/\btv\b|video|stream/.test(n)) return "tv";
-        if (/wireless|cellular|lte|5g|mobile/.test(n)) return "wireless";
-        if (/dsl|copper|broadband|internet|high speed/.test(n)) return "wifi";
-        return "default";
-    }
-    c.productBadgeClass = function(name) {
-        return "badge-icon-" + getProdKey(name);
-    };
-    c.productIcon = function(name) {
-        var key = getProdKey(name);
+    c.productIcon = function(key) {
         if (!prodSvgCache[key]) {
             prodSvgCache[key] = $sce.trustAsHtml(
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" ' +
@@ -102,154 +86,10 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return s;
     };
 
-    c.isChildFeatureOrFee = function(name) {
-        if (!name) return true;
-        var n = String(name).toLowerCase().trim();
-        if (!n) return true;
-        if (
-            /tech install|technician|installation|install waiver|waiver|install fee|one time charge|one-time charge|activation fee|dispatch fee|setup fee|shipping|discount|promotional credit|facility relocation|subscriber line|access recovery|charge|surcharge|fee|rebate|recovery|request technician/.test(n)
-        ) {
-            return true;
-        }
-        var callingFeatures = [
-            "call forwarding", "caller id", "call waiting", "3-way calling", "three-way calling", "3 way calling",
-            "speed call", "call return", "selective call", "anonymous call", "call trace", "call reject",
-            "distinctive ring", "hunting service", "voicemail", "voice mail", "non-published",
-            "unpublished number", "unlisted number", "inside wire", "wire maintenance", "long distance",
-            "data calls", "blocking", "features pack"
-        ];
-        for (var i = 0; i < callingFeatures.length; i++) {
-            if (n.indexOf(callingFeatures[i]) > -1) return true;
-        }
-        if (/^(?:up\s*to\s*)?\d+(?:\.\d+)?\s*(?:m|mbps|g|gig|gbps|k|kbps)?(?:[\/_]\s*\d+(?:\.\d+)?\s*(?:m|mbps|k|kbps)?)?$/i.test(n)) {
-            return true;
-        }
-        if (
-            n.indexOf("wifi pod") > -1 ||
-            n.indexOf("wi-fi pod") > -1 ||
-            n.indexOf("extender") > -1 ||
-            n.indexOf("battery backup") > -1 ||
-            n.indexOf("power supply") > -1 ||
-            n.indexOf("optical network terminal") > -1 ||
-            n.indexOf("modem lease") > -1 ||
-            n.indexOf("modem purchase") > -1
-        ) {
-            return true;
-        }
-        return false;
-    };
-    c.isInstallOrFee = function(name) {
-        return c.isChildFeatureOrFee(name);
-    };
     c.actionKey = function() {
         return (c.data.order && c.data.order.actionKey) || "DEFAULT";
     };
-    // ---------------- Badge helpers ----------------
-    function statusTone(text) {
-        var s = (text || "").toLowerCase();
-        if (/requested|billing update/.test(s)) return "info";
-        if (/suspend|paus/.test(s)) return "warning";
-        if (/disconnect|ported out|moved out|fallout|error|fail|critical|cease/.test(s)) return "danger";
-        if (/cancel|void|reject|existing/.test(s)) return "canceled";
-        if (/hold|block|pend|jeopardy|wait|risk/.test(s)) return "warning";
-        if (/restor|resum|active|complet|closed|fulfil|updated|good/.test(s)) return "success";
-        return "info";
-    }
-    // Badge text comes ONLY from the API: display_status → status.
-    // Nothing from the API → no badge.
-    function groupBadge(group) {
-        var g = group || {};
-        var text =
-            String(g.display_status || "").trim() ||
-            String(g.status || "").trim();
-        return {
-            text: text,
-            tone: text ? statusTone(text) : ""
-        };
-    }
-
-    function groups() {
-        return (c.data.order && c.data.order.productGroups) || null;
-    }
-    // ---------------- Products ----------------
-    function uniqueProducts(list) {
-        var seen = {};
-        return (list || []).filter(function(p) {
-            if (p === null || p === undefined) return false;
-            var name = typeof p === "object" ? (p.name || p.product_name || p.productName || "") : String(p);
-            var key = String(name).trim();
-            if (!key || c.isChildFeatureOrFee(key) || seen[key]) return false;
-            seen[key] = true;
-            return true;
-        }).map(function(p) {
-            return typeof p === "object" ? (p.name || p.product_name || p.productName || "") : p;
-        });
-    }
-    c.existingProducts = function() {
-        var g = groups();
-        var rawList = (g && g.existing && g.existing.items) || [];
-        if (!rawList.length) {
-            var sc = (c.data.order && c.data.order.scenario) || {};
-            rawList = sc.existing_products && sc.existing_products.length ?
-                sc.existing_products :
-                sc.disconnected_services;
-        }
-        return uniqueProducts(rawList);
-    };
-    c.requestedProducts = function() {
-        var g = groups();
-        var rawList = (g && g.requested && g.requested.items) || [];
-        if (!rawList.length) {
-            var sc = (c.data.order && c.data.order.scenario) || {};
-            rawList = sc.requested_products && sc.requested_products.length ?
-                sc.requested_products :
-                sc.added_services;
-        }
-        return uniqueProducts(rawList);
-    };
-    c.otherOrderProducts = function() {
-        // API product groups present → show only those, never the generic list
-        if (groups()) return [];
-        var o = c.data.order || {};
-        var sc = o.scenario || {};
-        return uniqueProducts(
-            sc.order_products && sc.order_products.length ? sc.order_products : o.productsList,
-        );
-    };
-    c.hasProducts = function() {
-        return (
-            c.existingProducts().length > 0 ||
-            c.requestedProducts().length > 0 ||
-            c.otherOrderProducts().length > 0
-        );
-    };
-    c.requestedTitle = function() {
-        return (c.data.order && c.data.order.requestedTitle) || "Requested Services";
-    };
-    c.existingTitle = function() {
-        return (c.data.order && c.data.order.existingTitle) || "Existing Services";
-    };
-    c.requestedBadge = function() {
-        var b = groupBadge((groups() || {}).requested);
-        if (!b.text && c.isMove()) return { text: 'Installing', tone: 'info' };
-        return b;
-    };
-    c.existingBadge = function() {
-        if (c.isMove() && c.isCanceled()) {
-            return { text: "Active", tone: "success" };
-        }
-        var b = groupBadge((groups() || {}).existing);
-        if (!b.text && c.isMove()) return { text: "Active", tone: "success" };
-        return b;
-    };
     // ---------------- Scenario helpers ----------------
-    c.isDisconnect = function() {
-        var o = c.data.order;
-        if (!o) return false;
-        var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
-        if (scType === "DISCONNECT") return true;
-        return (o.actionSubtype || "").toUpperCase() === "PORT_OUT";
-    };
     c.isMove = function() {
         var o = c.data.order;
         if (!o) return false;
@@ -438,10 +278,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
     };
     // Status chip text for actions that need no manual work
-    c.actionStatusText = function(act) {
-        if (act && act.status_label) return act.status_label;
-        return c.isCompleted() ? "All fulfillment tasks closed complete" : "No manual action needed";
-    };
     c.nextActionHeading = function() {
         if (c.isCompleted()) return "Order Fulfillment Status";
         var o = c.data.order || {};
@@ -455,21 +291,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             (o.healthStatus || "").toLowerCase() === "critical" ||
             acts.some(isHighPriority);
         return critical ? "Critical next actions" : "Recommended next action";
-    };
-    c.actionDirectiveIcon = function(act) {
-        return c.actionIcon(act);
-    };
-    c.actionDirectiveKicker = function(act) {
-        if (c.isCompleted()) return "Order fulfillment completed";
-        if (c.isActionCompleted(act)) return "Operational execution directive";
-        var o = c.data.order || {};
-        if (o.phase === "error" || o.falloutRecordCount > 0) {
-            return "Critical fallout recovery directive";
-        }
-        if (act && act.action_type === "resolve_dependency") {
-            return "Dependency resolution directive";
-        }
-        return "Operational action directive";
     };
     // ---------------- Summary narrative ----------------
     function escapeHtml(str) {
@@ -660,24 +481,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         fetchSummary(true);
     };
 
-    function clampPage(page, length) {
-        if (length <= 0) return 0;
-        if (page < 0) return 0;
-        if (page > length - 1) return length - 1;
-        return page;
-    }
-    c.currentFalloutTask = function() {
-        var records = (c.data.order && c.data.order.falloutRecords) || [];
-        return records[c.state.falloutPage] || {};
-    };
-    c.prevFalloutTask = function() {
-        var length = ((c.data.order && c.data.order.falloutRecords) || []).length;
-        c.state.falloutPage = clampPage(c.state.falloutPage - 1, length);
-    };
-    c.nextFalloutTask = function() {
-        var length = ((c.data.order && c.data.order.falloutRecords) || []).length;
-        c.state.falloutPage = clampPage(c.state.falloutPage + 1, length);
-    };
 
     function openRecord(table, sys_id, title) {
         if (!sys_id) return;
@@ -699,10 +502,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         } else {
             openRecord("sn_customerservice_case", caseItem.case_sys_id, caseItem.case_number);
         }
-    };
-    c.openCurrentFalloutTask = function() {
-        var record = c.currentFalloutTask();
-        openRecord("sn_fallout_mgmt_fallout", record.fallout_sys_id, record.task_name);
     };
 
 };
