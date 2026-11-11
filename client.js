@@ -12,6 +12,8 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
         user: '<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>',
         cancel: '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+        truck: '<rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle>',
+        box: '<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line>',
         default: '<circle cx="12" cy="12" r="9"/>',
     };
     var iconCache = {};
@@ -112,9 +114,30 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     c.isCompleted = function() {
         var o = c.data.order;
         if (!o) return false;
-        var st = (o.u_state || o.state || "").toLowerCase();
+        var st = (o.u_state || o.state || o.order_status || o.orderStatus || "").toLowerCase();
         return o.phase === "success" || /\b(completed?|closed)\b/.test(st);
     };
+
+    c.isPastDue = function() {
+        var o = c.data.order;
+        if (!o) return false;
+        var st = (o.u_state || o.state || o.order_status || o.orderStatus || "").toLowerCase();
+        var hs = (o.healthStatus || "").toLowerCase();
+        if (/complete|close|cancel|void|reject/.test(st + " " + hs)) return false;
+        if (o.isPastDue !== undefined) return !!o.isPastDue;
+        var dueStr = o.dueDate || o.due_date;
+        if (!dueStr) return false;
+        var formatted = c.formatDate(dueStr);
+        var parts = formatted.split("/");
+        if (parts.length === 3) {
+            var dueObj = new Date(parseInt(parts[2], 10), parseInt(parts[0], 10) - 1, parseInt(parts[1], 10));
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return dueObj < today;
+        }
+        return false;
+    };
+
     c.healthBadge = function() {
         var o = c.data.order;
         if (!o) return {
@@ -123,16 +146,16 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
         var hs = (o.healthStatus || "").toLowerCase();
         var st = (o.u_state || o.state || o.order_status || o.orderStatus || "").toLowerCase();
-        if (st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold()) {
-            return {
-                text: "Risk",
-                tone: "warning"
-            };
-        }
         if (/cancel|void/.test(hs + " " + st)) {
             return {
                 text: o.u_state || o.state || "Canceled",
                 tone: "canceled"
+            };
+        }
+        if (c.isPastDue() || st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold()) {
+            return {
+                text: "Risk",
+                tone: "warning"
             };
         }
         if (c.isCompleted() || hs === "good") return {
@@ -356,7 +379,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             st.indexOf("void") > -1 ||
             st.indexOf("reject") > -1 ||
             hs.indexOf("cancel") > -1 ||
-            c.healthBadge().tone === "canceled" ||
             c.hasCancellationDetails()
         );
     };
@@ -397,6 +419,96 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         }
         return cd[key] || "";
     };
+    // ---------------- Brightspeed Voice+ Helpers ----------------
+    c.isVoicePlus = function() {
+        var o = c.data.order;
+        if (!o) return false;
+        var st = (o.serviceType || o.service_type || "").toLowerCase();
+        return !!(o.isVoicePlus || (o.scenario && o.scenario.is_voice_plus) || st.indexOf("voice+") > -1 || st.indexOf("brightspeedvoice+") > -1);
+    };
+
+    c.getVoicePlus = function() {
+        var o = c.data.order || {};
+        return o.voicePlusDetails || (o.scenario && o.scenario.voice_plus_details) || {};
+    };
+
+    c.isVoicePlusInstall = function() {
+        return c.isVoicePlus() && !c.isVoicePlusChange() && !c.isVoicePlusDisconnect();
+    };
+
+    c.isVoicePlusDisconnect = function() {
+        if (!c.isVoicePlus()) return false;
+        var o = c.data.order || {};
+        var act = (o.actionSubtype || o.orderAction || (o.scenario && o.scenario.order_action) || "").toLowerCase();
+        var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
+        return scType === "DISCONNECT" || act.indexOf("disco") > -1 || act.indexOf("cancel") > -1;
+    };
+
+    c.isVoicePlusChange = function() {
+        if (!c.isVoicePlus()) return false;
+        var o = c.data.order || {};
+        var act = (o.actionSubtype || o.orderAction || (o.scenario && o.scenario.order_action) || "").toLowerCase();
+        var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
+        return scType === "VOICE_PLUS_CHANGE" || act.indexOf("change") > -1 || act.indexOf("modify") > -1;
+    };
+
+    c.getShipmentStatus = function() {
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        return o.shipmentStatus || vp.shipment_status || "";
+    };
+
+    c.getCarrier = function() {
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        return o.carrier || vp.carrier || "";
+    };
+
+    c.getTrackingNumber = function() {
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        return o.trackingNumber || vp.tracking_number || "";
+    };
+
+    c.getTrackingUrl = function() {
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        if (o.trackingUrl) return o.trackingUrl;
+        if (vp.tracking_url) return vp.tracking_url;
+        var tn = c.getTrackingNumber();
+        if (!tn) return "";
+        var carr = (c.getCarrier() || "").toLowerCase();
+        if (carr.indexOf("ups") > -1) {
+            return "https://www.ups.com/track?tracknum=" + encodeURIComponent(tn);
+        }
+        return "https://www.fedex.com/fedextrack/?tracknumbers=" + encodeURIComponent(tn);
+    };
+
+    c.hasShipment = function() {
+        return !!(c.getShipmentStatus() || c.getTrackingNumber());
+    };
+
+    c.toggleVoicePlusProducts = function() {
+        c.state.showAllVoicePlusProducts = !c.state.showAllVoicePlusProducts;
+    };
+
+    c.getVoicePlusProducts = function() {
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        var list = o.productsList || vp.clean_products || [];
+        if (c.state.showAllVoicePlusProducts) {
+            return list;
+        }
+        return list.slice(0, 2);
+    };
+
+    c.getTotalVoicePlusProductCount = function() {
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        var list = o.productsList || vp.clean_products || [];
+        return list.length;
+    };
+
     c.state = {
         collapsed: true,
         loading: false,
@@ -405,6 +517,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         errorMessage: "",
         casePage: 0,
         falloutPage: 0,
+        showAllVoicePlusProducts: false,
     };
 
     function fetchSummary(force) {

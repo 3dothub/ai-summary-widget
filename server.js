@@ -11,12 +11,12 @@
         return "";
     };
 
-    data.order_id =
+    data.order_id =(input && input.order_id) ||
         options.order_id ||
         $sp.getParameter("order_id") ||
         $sp.getParameter("number") ||
         pick(record, ["Order ID", "order_id", "u_order_id", "Number", "number", "order_number", "u_order_number", "External Order ID", "external_id", "u_external_id"]);
-    data.sys_id = options.sys_id || $sp.getParameter("sys_id") || pick(record, ["sys_id", "sysId", "u_sys_id"]);
+    data.sys_id = (input && input.sys_id) || options.sys_id || $sp.getParameter("sys_id") || pick(record, ["sys_id", "sysId", "u_sys_id"]);
     data.tabUniqueId = options.tabUniqueId;
     data.tabContainerId = options.tabContainerId;
 

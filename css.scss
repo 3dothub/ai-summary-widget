@@ -40,7 +40,7 @@
   line-height: 1.5;
   color: var(--text-main);
   position: fixed;
-  top: 40px;
+  top: 114px;
   right: 24px;
   bottom: 0;
   width: 40rem;
@@ -676,7 +676,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 6px 0 3px 0;
+  margin: 6px 0 16px 0;
   padding: 4px 10px;
   background: #eff6ff;
   border: 1px solid #bfdbfe;
@@ -1382,7 +1382,7 @@
   margin-left: auto;
   align-items: center;
   justify-content: flex-end;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 4px;
   min-width: 0;
 }
@@ -1633,6 +1633,7 @@ Suspension, Resumption, Move, and every other scenario. */
     font-weight: 800 !important;
     line-height: 1.3 !important;
     letter-spacing: -0.2px !important;
+    white-space: nowrap !important;
   }
 }
 
@@ -1640,6 +1641,14 @@ Suspension, Resumption, Move, and every other scenario. */
   white-space: nowrap !important;
   font-size: 10.5px !important;
   letter-spacing: -0.3px !important;
+}
+
+.ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-lines .aisw-tile-value.font-line:not(.tn-value) {
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: normal !important;
 }
 
 /* ---------------- Skeleton loader (first load + refresh) ----------------
@@ -1831,6 +1840,7 @@ Scoped to .aisw-tiles-single so the shared :only-child sizing stays as is. */
     font-size: 13px !important;
     font-weight: 800 !important;
     min-width: 0 !important;
+    white-space: nowrap !important;
     overflow-wrap: break-word !important;
     word-break: normal !important;
   }
@@ -2079,4 +2089,457 @@ Scoped to .aisw-tiles-single so the shared :only-child sizing stays as is. */
   display: block;
   width: 14px;
   height: 14px;
+}
+
+/* Scenario header wrapping fix */
+.ai-summary-widget .aisw-scenario-card .aisw-scenario-header {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px;
+  width: 100%;
+}
+
+/* ==========================================================================
+   Brightspeed Voice+ and Past Due Portal Styles
+   ========================================================================== */
+
+/* Past Due Standalone Badge and Pulse Animation Effect */
+@keyframes aisw-past-due-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+    border-color: #f87171;
+  }
+  50% {
+    box-shadow: 0 0 0 4.5px rgba(220, 38, 38, 0.2);
+    border-color: #dc2626;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+    border-color: #f87171;
+  }
+}
+
+@keyframes aisw-dot-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.65);
+  }
+}
+
+.ai-summary-widget .aisw-past-due-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2.5px 7px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #f87171;
+  border-radius: 9999px;
+  line-height: 1.3;
+  white-space: nowrap;
+  animation: aisw-past-due-pulse 2s infinite ease-in-out;
+  cursor: default;
+}
+
+.ai-summary-widget .aisw-past-due-pulse-dot {
+  width: 5.5px;
+  height: 5.5px;
+  border-radius: 50%;
+  background: #dc2626;
+  animation: aisw-dot-pulse 1.5s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.ai-summary-widget .aisw-past-due-icon {
+  font-size: 9.5px;
+  color: #dc2626;
+  line-height: 1;
+}
+
+.ai-summary-widget .aisw-past-due-text {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #b91c1c;
+  line-height: 1;
+  letter-spacing: 0.1px;
+}
+
+/* Brightspeed Voice+ Highlights Section */
+.ai-summary-widget .aisw-vp-highlights {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ai-summary-widget .aisw-vp-cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+.ai-summary-widget .aisw-vp-card {
+  flex: 1 1 calc(50% - 4px);
+  min-width: 140px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+}
+.ai-summary-widget .aisw-vp-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+.ai-summary-widget .aisw-vp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.ai-summary-widget .aisw-vp-card-icon svg {
+  width: 14px;
+  height: 14px;
+  stroke: #2563eb;
+}
+.ai-summary-widget .aisw-vp-card-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+}
+.ai-summary-widget .aisw-vp-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+}
+.ai-summary-widget .aisw-vp-main-stat {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+.ai-summary-widget .aisw-vp-stat-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.ai-summary-widget .aisw-vp-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.ai-summary-widget .aisw-vp-badge-active {
+  background: #dcfce7;
+  color: #15803d;
+}
+.ai-summary-widget .aisw-vp-badge-shipped {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.ai-summary-widget .aisw-vp-badge-disco {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.ai-summary-widget .aisw-vp-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #334155;
+}
+.ai-summary-widget .aisw-vp-meta-label {
+  color: #64748b;
+  font-weight: 500;
+}
+.ai-summary-widget .aisw-vp-meta-val {
+  color: #1e293b;
+  text-align: right;
+  word-break: break-word;
+}
+.ai-summary-widget .aisw-vp-devices-summary {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1e293b;
+  margin-top: 2px;
+}
+.ai-summary-widget .aisw-vp-device-item {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+}
+.ai-summary-widget .aisw-vp-device-qty {
+  font-weight: 700;
+  color: #2563eb;
+}
+
+/* Shipment Tracker Button */
+.ai-summary-widget .aisw-vp-tracker-btn-row {
+  margin-top: 6px;
+}
+.ai-summary-widget .aisw-tracker-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  padding: 3px 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.ai-summary-widget .aisw-tracker-link-btn:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+/* Change tags */
+.ai-summary-widget .aisw-vp-change-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 2px;
+}
+.ai-summary-widget .aisw-vp-change-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  display: inline-block;
+}
+.ai-summary-widget .aisw-vp-change-tag.tag-added {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.ai-summary-widget .aisw-vp-change-tag.tag-changed {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.ai-summary-widget .aisw-vp-change-tag.tag-disco {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* Enterprise Customer and Order Details Card */
+.ai-summary-widget .aisw-vp-ent-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+.ai-summary-widget .aisw-vp-ent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ai-summary-widget .aisw-vp-ent-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+}
+.ai-summary-widget .aisw-vp-badge-ent {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+.ai-summary-widget .aisw-vp-ent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+}
+.ai-summary-widget .aisw-vp-ent-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ai-summary-widget .aisw-vp-ent-label {
+  font-size: 10px;
+  color: #64748b;
+  font-weight: 500;
+}
+.ai-summary-widget .aisw-vp-ent-val {
+  font-size: 11px;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+/* Voice+ Products Card and Show More */
+.ai-summary-widget .aisw-vp-products-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+.ai-summary-widget .aisw-vp-products-header {
+  margin-bottom: 6px;
+}
+.ai-summary-widget .aisw-vp-products-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+}
+.ai-summary-widget .aisw-vp-products-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ai-summary-widget .aisw-vp-product-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #1e293b;
+}
+.ai-summary-widget .aisw-vp-prod-dot {
+  color: #3b82f6;
+  font-weight: bold;
+}
+.ai-summary-widget .aisw-vp-more-container {
+  margin-top: 8px;
+  text-align: center;
+}
+.ai-summary-widget .aisw-vp-more-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+.ai-summary-widget .aisw-vp-more-btn:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #1d4ed8;
+}
+
+.aisw-char-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 6px 0 8px 0;
+}
+.aisw-char-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  color: #334155;
+}
+.aisw-char-chip-icon {
+  font-size: 12px;
+}
+.aisw-char-chip-wifi {
+  background: #eff6ff;
+  border: 1px solid #93c5fd;
+  color: #1d4ed8;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.12);
+  animation: aisw-wifi-glow 2.5s infinite ease-in-out;
+}
+.aisw-char-chip-wifi strong {
+  color: #1e40af;
+}
+.aisw-char-chip-wifi .aisw-wifi-svg {
+  color: #2563eb;
+  display: inline-block;
+  vertical-align: middle;
+  animation: aisw-wifi-pulse 2s infinite ease-in-out;
+}
+@keyframes aisw-wifi-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.25), 0 1px 3px rgba(37, 99, 235, 0.12);
+    border-color: #93c5fd;
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(59, 130, 246, 0.4), 0 2px 4px rgba(37, 99, 235, 0.18);
+    border-color: #3b82f6;
+  }
+}
+@keyframes aisw-wifi-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.82;
+  }
+}
+
+.aisw-char-chip-byod {
+  background: #faf5ff;
+  border: 1px solid #d8b4fe;
+  color: #7e22ce;
+  box-shadow: 0 1px 3px rgba(124, 58, 237, 0.12);
+  animation: aisw-byod-glow 2.5s infinite ease-in-out;
+}
+.aisw-char-chip-byod strong {
+  color: #6b21a8;
+}
+.aisw-char-chip-byod .aisw-byod-svg {
+  color: #9333ea;
+  display: inline-block;
+  vertical-align: middle;
+  animation: aisw-byod-pulse 2s infinite ease-in-out;
+}
+@keyframes aisw-byod-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.25), 0 1px 3px rgba(124, 58, 237, 0.12);
+    border-color: #d8b4fe;
+  }
+  50% {
+    box-shadow: 0 0 8px 2px rgba(168, 85, 247, 0.45), 0 2px 4px rgba(124, 58, 237, 0.2);
+    border-color: #a855f7;
+  }
+}
+@keyframes aisw-byod-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.18);
+    opacity: 0.85;
+  }
 }
