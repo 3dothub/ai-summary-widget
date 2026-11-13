@@ -164,19 +164,20 @@
                 <span class="aisw-past-due-icon" aria-hidden="true">&#9888;</span>
                 <span class="aisw-past-due-text">Past Due</span>
               </span>
-              <!-- RESTORED: health status badge (hidden when on hold with dedicated reason callout) -->
-              <span class="aisw-status-badge" ng-class="'badge-' + c.healthBadge().tone" ng-if="!c.isOnHold() || !c.getOnHoldReason()">
+              <!-- Health status badge (always shown) -->
+              <span class="aisw-status-badge" ng-class="'badge-' + c.healthBadge().tone" ng-if="c.healthBadge() && c.healthBadge().text">
                 <span class="aisw-status-dot" ng-class="'dot-' + c.healthBadge().tone"></span>
                 {{c.healthBadge().text}}
               </span>
             </div>
           </div>
-          <div class="aisw-install-type-chip" ng-if="c.data.order.installationType" style="color: #1d4ed8;">
-            <span class="aisw-install-type-icon" aria-hidden="true" ng-bind-html="c.installTypeIcon(c.data.order.installationType)"></span>
-            <span class="aisw-install-type-text" style="color: #1d4ed8;">{{c.data.order.installationType}}</span>
-          </div>
           <!-- Characteristics Badges (Wi-Fi / BYOD) when present in 622 payload -->
-          <div class="aisw-char-badges" ng-if="c.data.order.wifiStatus || c.data.order.byodStatus">
+          <div class="aisw-char-badges" ng-if="(c.data.order.installationType && !c.isVoicePlus()) || c.data.order.wifiStatus || c.data.order.byodStatus">
+            <div class="aisw-install-type-chip" ng-if="c.data.order.installationType && !c.isVoicePlus()" style="color: #1d4ed8;">
+              <span class="aisw-install-type-icon" aria-hidden="true" ng-bind-html="c.installTypeIcon(c.data.order.installationType)"></span>
+              <span class="aisw-install-type-text" style="color: #1d4ed8;">{{c.data.order.installationType}}</span>
+            </div>
+
             <span class="aisw-char-chip aisw-char-chip-wifi" ng-if="c.data.order.wifiStatus">
               <svg class="aisw-wifi-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
@@ -184,7 +185,7 @@
                 <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
                 <circle cx="12" cy="20" r="1.5" fill="currentColor"></circle>
               </svg>
-              <strong>Wi-Fi:</strong>&nbsp;{{c.data.order.wifiStatus}}
+              <strong>WiFi Disable:</strong>&nbsp;{{c.data.order.wifiStatus}}
             </span>
             <span class="aisw-char-chip aisw-char-chip-byod" ng-if="c.data.order.byodStatus">
               <svg class="aisw-byod-svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -224,7 +225,7 @@
               </div>
             </div>
           </div>
-          <div class="aisw-tiles-row" ng-if="!c.isVoicePlus() && c.data.order.cards" ng-class="{'aisw-tiles-single': c.data.order.cards.single}" data-case="{{c.data.order.cards.caseId}}">
+          <div class="aisw-tiles-row" ng-if="c.data.order.cards && !c.isVoicePlus()" ng-class="{'aisw-tiles-single': c.data.order.cards.single}" data-case="{{c.data.order.cards.caseId}}">
             <div ng-repeat-start="t in c.data.order.cards.tiles track by $index"
                  class="aisw-tile" ng-class="'tile-' + t.tone">
               <span class="aisw-tile-label">{{t.label}}</span>
@@ -240,288 +241,43 @@
             </div>
             <div ng-repeat-end class="aisw-tile-arrow-bubble" ng-if="c.data.order.cards.arrow && !$last">&rarr;</div>
           </div>
+          <!-- Voice+ Service Highlights (prominently highlights Package, Seats, Term, and Devices) -->
+          <div class="aisw-vp-hero-card" ng-if="c.isVoicePlus()">
+            <div class="aisw-vp-hero-header">
+              <div class="aisw-vp-hero-badge">
+                <span class="aisw-vp-hero-icon">&#9742;</span>
+                <span class="aisw-vp-hero-pkg">{{c.getVoicePlus().package_name || 'Brightspeed Voice+'}}</span>
+              </div>
+              <span class="aisw-vp-hero-term" ng-if="c.getVoicePlus().contract_term">{{c.getVoicePlus().contract_term}}</span>
+            </div>
+            <div class="aisw-vp-hero-grid">
+              <div class="aisw-vp-hero-metric" ng-if="c.getVoicePlus().license_count">
+                <span class="aisw-vp-metric-val">{{c.getVoicePlus().license_count}}</span>
+                <span class="aisw-vp-metric-lbl">Licenses / Seats</span>
+                <span class="aisw-vp-metric-sub" ng-if="c.getVoicePlus().license_sub">{{c.getVoicePlus().license_sub}}</span>
+              </div>
+              <div class="aisw-vp-hero-metric" ng-if="c.getVoicePlus().total_devices > 0">
+                <span class="aisw-vp-metric-val">{{c.getVoicePlus().total_devices}}</span>
+                <span class="aisw-vp-metric-lbl">{{c.getVoicePlus().devices_label || 'Devices Included'}}</span>
+                <span class="aisw-vp-metric-sub" ng-if="c.getVoicePlus().devices_sub">{{c.getVoicePlus().devices_sub}}</span>
+              </div>
+            </div>
+            <div class="aisw-vp-hero-devices" ng-if="c.getVoicePlus().devices && c.getVoicePlus().devices.length">
+              <div class="aisw-vp-devices-title">Hardware Models</div>
+              <div class="aisw-vp-device-chips">
+                <span class="aisw-vp-device-chip" ng-repeat="d in c.getVoicePlus().devices track by $index">
+                  <span class="aisw-vp-chip-qty">{{d.quantity}}x</span>
+                  <span class="aisw-vp-chip-name">{{d.name}}</span>
+                </span>
+              </div>
+            </div>
+          </div>
           <!-- Narrative Paragraph -->
           <p
                   class="aisw-scenario-narrative"
                   ng-bind-html="c.formattedSummary()"
           ></p>
 
-          <!-- ================= Brightspeed Voice+ Highlights Grid ================= -->
-          <div class="aisw-vp-highlights" ng-if="c.isVoicePlus()">
-            <!-- NEW INSTALLATION SCENARIO -->
-            <div class="aisw-vp-cards-grid" ng-if="c.isVoicePlusInstall()">
-              <!-- 1. Package & Seats Card -->
-              <div class="aisw-vp-card">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('sparkles')"></span>
-                  <span class="aisw-vp-card-title">Package &amp; Capacity</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val">{{c.getVoicePlus().license_count ? (c.getVoicePlus().license_count + ' Seats') : (c.getVoicePlus().package_name || 'Voice+ Package')}}</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-active" ng-if="c.getVoicePlus().license_count">Active</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getVoicePlus().package_name && c.getVoicePlus().license_count">
-                    <span class="aisw-vp-meta-label">Package:</span>
-                    <span class="aisw-vp-meta-val font-semibold">{{c.getVoicePlus().package_name}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getVoicePlus().contract_term">
-                    <span class="aisw-vp-meta-label">Contract Term:</span>
-                    <span class="aisw-vp-meta-val">{{c.getVoicePlus().contract_term}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getVoicePlus().price_plan">
-                    <span class="aisw-vp-meta-label">Plan Code:</span>
-                    <span class="aisw-vp-meta-val">{{c.getVoicePlus().price_plan}}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2. IP Hardware Card (only if devices > 0) -->
-              <div class="aisw-vp-card" ng-if="c.getVoicePlus().total_devices > 0">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('box')"></span>
-                  <span class="aisw-vp-card-title">IP Hardware</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val">{{c.getVoicePlus().total_devices}} Poly Handsets Dispatched</span>
-                  </div>
-                  <div class="aisw-vp-devices-summary" ng-if="c.getVoicePlus().devices_summary">
-                    {{c.getVoicePlus().devices_summary}}
-                  </div>
-                  <div class="aisw-vp-device-item" ng-repeat="dev in c.getVoicePlus().devices track by $index">
-                    <span class="aisw-vp-device-qty">{{dev.quantity}}x</span>
-                    <span class="aisw-vp-device-model">{{dev.model}}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3. Hardware Shipment Card (only if shipment or tracking exists) -->
-              <div class="aisw-vp-card aisw-vp-shipment-card" ng-if="c.hasShipment()">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('truck')"></span>
-                  <span class="aisw-vp-card-title">Hardware Shipment</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val" ng-if="c.getShipmentStatus()">{{c.getShipmentStatus()}}</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-shipped" ng-if="c.getShipmentStatus()">{{c.getShipmentStatus()}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getCarrier()">
-                    <span class="aisw-vp-meta-label">Carrier:</span>
-                    <span class="aisw-vp-meta-val font-semibold">{{c.getCarrier()}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getTrackingNumber()">
-                    <span class="aisw-vp-meta-label">Tracking #:</span>
-                    <span class="aisw-vp-meta-val">{{c.getTrackingNumber()}}</span>
-                  </div>
-                  <div class="aisw-vp-tracker-btn-row" ng-if="c.getTrackingNumber()">
-                    <a class="aisw-tracker-link-btn" ng-href="{{c.getTrackingUrl()}}" target="_blank" rel="noopener noreferrer">
-                      <span>Track Shipment</span> &rarr;
-                    </a>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Fallback provisioning card if no hardware and no shipment -->
-              <div class="aisw-vp-card" ng-if="c.getVoicePlus().total_devices === 0 && !c.hasShipment()">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('check-circle')"></span>
-                  <span class="aisw-vp-card-title">Provisioning Status</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val">UCaaS Active</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-active">Ready</span>
-                  </div>
-                  <div class="aisw-vp-meta-val" style="margin-top: 4px; color: #475569;">RingCentral UCaaS digital subscriber profiles and licensing allocated.</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- CHANGE / MODIFICATION SCENARIO -->
-            <div class="aisw-vp-cards-grid" ng-if="c.isVoicePlusChange()">
-              <!-- Modification Summary Card -->
-              <div class="aisw-vp-card">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('sparkles')"></span>
-                  <span class="aisw-vp-card-title">Voice+ Modification</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat" ng-if="c.getVoicePlus().from_seats && c.getVoicePlus().to_seats">
-                    <span class="aisw-vp-stat-val">{{c.getVoicePlus().from_seats}} &rarr; {{c.getVoicePlus().to_seats}} Seats</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-active">Expanded</span>
-                  </div>
-                  <div class="aisw-vp-main-stat" ng-if="!c.getVoicePlus().from_seats || !c.getVoicePlus().to_seats">
-                    <span class="aisw-vp-stat-val">{{c.getVoicePlus().package_name || 'Service Update'}}</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-active">Modified</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getVoicePlus().package_name">
-                    <span class="aisw-vp-meta-label">Package:</span>
-                    <span class="aisw-vp-meta-val font-semibold">{{c.getVoicePlus().package_name}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getVoicePlus().license_count">
-                    <span class="aisw-vp-meta-label">Total Licenses:</span>
-                    <span class="aisw-vp-meta-val font-semibold">{{c.getVoicePlus().license_count}} Seats</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Services / Hardware Added Card -->
-              <div class="aisw-vp-card aisw-vp-card-added" ng-if="c.getVoicePlus().added_products && c.getVoicePlus().added_products.length > 0">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('check-circle')"></span>
-                  <span class="aisw-vp-card-title">Services &amp; Devices Added</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-change-tag-list">
-                    <span class="aisw-vp-change-tag tag-added" ng-repeat="item in c.getVoicePlus().added_products track by $index">+ {{item}}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Changed / Upgraded Card -->
-              <div class="aisw-vp-card aisw-vp-card-modified" ng-if="c.getVoicePlus().changed_products && c.getVoicePlus().changed_products.length > 0">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('sparkles')"></span>
-                  <span class="aisw-vp-card-title">Package / Services Upgraded</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-change-tag-list">
-                    <span class="aisw-vp-change-tag tag-changed" ng-repeat="item in c.getVoicePlus().changed_products track by $index">&bull; {{item}}</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Hardware Shipment Card (only if shipment or tracking exists) -->
-              <div class="aisw-vp-card aisw-vp-shipment-card" ng-if="c.hasShipment()">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('truck')"></span>
-                  <span class="aisw-vp-card-title">Hardware Shipment</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val" ng-if="c.getShipmentStatus()">{{c.getShipmentStatus()}}</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-shipped" ng-if="c.getShipmentStatus()">{{c.getShipmentStatus()}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getCarrier()">
-                    <span class="aisw-vp-meta-label">Carrier:</span>
-                    <span class="aisw-vp-meta-val font-semibold">{{c.getCarrier()}}</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getTrackingNumber()">
-                    <span class="aisw-vp-meta-label">Tracking #:</span>
-                    <span class="aisw-vp-meta-val">{{c.getTrackingNumber()}}</span>
-                  </div>
-                  <div class="aisw-vp-tracker-btn-row" ng-if="c.getTrackingNumber()">
-                    <a class="aisw-tracker-link-btn" ng-href="{{c.getTrackingUrl()}}" target="_blank" rel="noopener noreferrer">
-                      <span>Track Shipment</span> &rarr;
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- DISCONNECT SCENARIO -->
-            <div class="aisw-vp-cards-grid" ng-if="c.isVoicePlusDisconnect()">
-              <!-- Ceased Service Card -->
-              <div class="aisw-vp-card aisw-vp-card-disco">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('cancel')"></span>
-                  <span class="aisw-vp-card-title">Ceased Voice+ Service</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val">{{c.getVoicePlus().package_name || 'Brightspeed Voice+'}}</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-disco">Discontinued</span>
-                  </div>
-                  <div class="aisw-vp-meta-row" ng-if="c.getVoicePlus().license_count">
-                    <span class="aisw-vp-meta-label">Deallocated Seats:</span>
-                    <span class="aisw-vp-meta-val font-semibold">{{c.getVoicePlus().license_count}} Seats</span>
-                  </div>
-                  <div class="aisw-vp-meta-val" style="margin-top: 6px; color: #475569;">
-                    Automated deprovisioning of RingCentral UCaaS subscriptions and DID release completed.
-                  </div>
-                </div>
-              </div>
-
-              <!-- UCaaS Deprovisioning / Equipment Return Card -->
-              <div class="aisw-vp-card aisw-vp-card-disco">
-                <div class="aisw-vp-card-header">
-                  <span class="aisw-vp-card-icon" ng-bind-html="c.icon('box')"></span>
-                  <span class="aisw-vp-card-title">Deprovisioning &amp; Equipment</span>
-                </div>
-                <div class="aisw-vp-card-body">
-                  <div class="aisw-vp-main-stat">
-                    <span class="aisw-vp-stat-val">{{c.getVoicePlus().total_devices > 0 ? (c.getVoicePlus().total_devices + ' Devices for Return') : 'UCaaS Deprovisioned'}}</span>
-                    <span class="aisw-vp-badge aisw-vp-badge-disco">Complete</span>
-                  </div>
-                  <div class="aisw-vp-meta-val" ng-if="c.getVoicePlus().total_devices > 0" style="margin-top: 4px; color: #475569;">
-                    Equipment return kit and prepaid recovery shipping label issued for dispatched Poly IP handsets.
-                  </div>
-                  <div class="aisw-vp-meta-val" ng-if="!c.getVoicePlus().total_devices" style="margin-top: 4px; color: #475569;">
-                    All cloud PBX extensions, softphone credentials, and user profiles retired.
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Enterprise Account & Cost Center Details Card -->
-            <div class="aisw-vp-ent-card" ng-if="c.getVoicePlus().sfdc_name || c.getVoicePlus().commercial_order_id || c.getVoicePlus().sfdc_account">
-              <div class="aisw-vp-ent-header">
-                <span class="aisw-vp-ent-title">Enterprise Account &amp; Order Details</span>
-                <span class="aisw-vp-badge aisw-vp-badge-ent" ng-if="c.getVoicePlus().account_segment">{{c.getVoicePlus().account_segment}}</span>
-              </div>
-              <div class="aisw-vp-ent-grid">
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().sfdc_name">
-                  <span class="aisw-vp-ent-label">Enterprise Customer</span>
-                  <span class="aisw-vp-ent-val font-semibold">{{c.getVoicePlus().sfdc_name}}</span>
-                </div>
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().commercial_order_id">
-                  <span class="aisw-vp-ent-label">CPQ Order ID</span>
-                  <span class="aisw-vp-ent-val">{{c.getVoicePlus().commercial_order_id}}</span>
-                </div>
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().sfdc_account">
-                  <span class="aisw-vp-ent-label">SFDC Account</span>
-                  <span class="aisw-vp-ent-val">{{c.getVoicePlus().sfdc_account}}</span>
-                </div>
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().sfdc_parent">
-                  <span class="aisw-vp-ent-label">SFDC Parent Account</span>
-                  <span class="aisw-vp-ent-val">{{c.getVoicePlus().sfdc_parent}}</span>
-                </div>
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().contact_name">
-                  <span class="aisw-vp-ent-label">Customer Contact</span>
-                  <span class="aisw-vp-ent-val">{{c.getVoicePlus().contact_name}}</span>
-                </div>
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().seller_name">
-                  <span class="aisw-vp-ent-label">Account Seller</span>
-                  <span class="aisw-vp-ent-val">{{c.getVoicePlus().seller_name}}</span>
-                </div>
-                <div class="aisw-vp-ent-cell" ng-if="c.getVoicePlus().cost_center_id">
-                  <span class="aisw-vp-ent-label">Cost Center ID</span>
-                  <span class="aisw-vp-ent-val">{{c.getVoicePlus().cost_center_id}}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Products in Order (Voice+ with max 2 shown & Show More toggle) -->
-            <div class="aisw-vp-products-card" ng-if="c.getTotalVoicePlusProductCount() > 0">
-              <div class="aisw-vp-products-header">
-                <span class="aisw-vp-products-title">Products in Order ({{c.getTotalVoicePlusProductCount()}})</span>
-              </div>
-              <div class="aisw-vp-products-list">
-                <div class="aisw-vp-product-row" ng-repeat="pname in c.getVoicePlusProducts() track by $index">
-                  <span class="aisw-vp-prod-dot">&bull;</span>
-                  <span class="aisw-vp-prod-name">{{pname}}</span>
-                </div>
-              </div>
-              <div class="aisw-vp-more-container" ng-if="c.getTotalVoicePlusProductCount() > 2">
-                <button type="button" class="aisw-vp-more-btn" ng-click="c.toggleVoicePlusProducts()">
-                  <span ng-if="!c.state.showAllVoicePlusProducts">+ {{c.getTotalVoicePlusProductCount() - 2}} more products &#9660;</span>
-                  <span ng-if="c.state.showAllVoicePlusProducts">Show less &#9650;</span>
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
         <!-- ================= 2. Service Address Banner ================= -->
         <!-- Move Order: Dual From -> To Address Banner -->
@@ -551,13 +307,13 @@
           </div>
         </div>
         <!-- Standard Service Address Banner -->
-        <div class="aisw-banner" ng-if="!c.isVoicePlus() && (!c.isMove() || (!c.moveFromAddress() && !c.moveToAddress())) && c.data.order.serviceAddress">
+        <div class="aisw-banner" ng-if="(!c.isMove() || (!c.moveFromAddress() && !c.moveToAddress())) && c.data.order.serviceAddress">
           <span class="aisw-banner-icon" aria-hidden="true">&#128205;</span>
           <span class="aisw-banner-label">Service Address:</span>
           <span class="aisw-banner-text">{{c.data.order.serviceAddress}}</span>
         </div>
         <!-- ================= 3. Products in Order ================= -->
-        <div class="aisw-products-section" ng-if="!c.isVoicePlus() && c.data.order.productSections.length">
+        <div class="aisw-products-section" ng-if="c.data.order.productSections.length">
           <h5 class="aisw-section-heading">Products in Order</h5>
           <div class="aisw-prod-card" ng-class="'prod-card-' + section.kind" ng-repeat="section in c.data.order.productSections track by section.id">
             <div class="aisw-prod-card-header">
@@ -565,9 +321,59 @@
               <span class="aisw-prod-badge badge-{{section.badge.tone}}" ng-if="section.badge" ng-class="{'aisw-existing-status': section.kind === 'existing'}">{{section.badge.text}}</span>
             </div>
             <div class="aisw-prod-list">
-              <div class="aisw-prod-row" ng-repeat="item in section.items track by $index">
+              <div class="aisw-prod-row" ng-repeat="item in ((section.showAll || c.state.showAllProducts) ? section.items : (section.items | limitTo: c.data.config.productPreviewLimit)) track by $index">
                 <span class="aisw-prod-icon-badge" ng-class="'badge-icon-' + item.icon" ng-bind-html="c.productIcon(item.icon)"></span>
                 <span class="aisw-prod-name">{{item.name}}</span>
+              </div>
+            </div>
+            <div class="aisw-prod-toggle-wrap" ng-if="section.items.length > c.data.config.productPreviewLimit">
+              <button type="button" class="aisw-prod-toggle-btn" ng-click="section.showAll = !(section.showAll || c.state.showAllProducts)">
+                <span ng-if="!(section.showAll || c.state.showAllProducts)">+{{section.items.length - c.data.config.productPreviewLimit}} more</span>
+                <span ng-if="(section.showAll || c.state.showAllProducts)">Show less</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <!-- ================= 4. Shipment & Tracking ================= -->
+        <div class="aisw-card-section" ng-if="c.hasShipment()">
+          <div class="aisw-section-header-row">
+            <h5 class="aisw-section-heading">Shipment &amp; Tracking</h5>
+            <span class="aisw-directive-pill aisw-shipment-pill" ng-if="c.getShipmentStatus()">{{c.getShipmentStatus()}}</span>
+          </div>
+          <div class="aisw-shipment-card">
+            <div class="aisw-shipment-meta-grid">
+              <div class="aisw-shipment-meta-cell" ng-if="c.getShipmentStatus()">
+                <span class="aisw-shipment-meta-label">Shipment Status</span>
+                <span class="aisw-shipment-meta-val font-semibold">{{c.getShipmentStatus()}}</span>
+              </div>
+              <div class="aisw-shipment-meta-cell" ng-if="c.getTrackingNumber()">
+                <span class="aisw-shipment-meta-label">Tracking #</span>
+                <a class="aisw-tracking-num-link font-semibold" ng-if="c.getTrackingUrl()" ng-href="{{c.getTrackingUrl()}}" target="_blank" rel="noopener noreferrer" title="Track package in carrier portal">
+                  <span>{{c.getTrackingNumber()}}</span>
+                  <svg class="aisw-tracking-external-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                  </svg>
+                </a>
+                <span class="aisw-shipment-meta-val font-semibold" ng-if="!c.getTrackingUrl()">{{c.getTrackingNumber()}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= 5. Account Information ================= -->
+        <div class="aisw-card-section" ng-if="c.hasAccountDetails()">
+          <h5 class="aisw-section-heading">Account Information</h5>
+          <div class="aisw-account-card">
+            <div class="aisw-account-grid">
+              <div class="aisw-account-cell" ng-if="c.getSfdcAccount()">
+                <span class="aisw-account-label">SFDC Account</span>
+                <span class="aisw-account-val font-semibold">{{c.getSfdcAccount()}}</span>
+              </div>
+              <div class="aisw-account-cell" ng-if="c.getParentAccount()">
+                <span class="aisw-account-label">Parent Account</span>
+                <span class="aisw-account-val font-semibold">{{c.getParentAccount()}}</span>
               </div>
             </div>
           </div>
@@ -586,8 +392,8 @@
               <div class="aisw-case-title">
                 <span ng-if="item.isRouting">Routing &middot; </span>
                 <span ng-if="!item.isRouting">Case &middot; </span>
-                <span class="aisw-link" ng-if="item.case_sys_id" ng-click="c.openCase(item)"
-                >{{item.case_number}}</span
+                <a class="aisw-link" href="javascript:void(0)" ng-if="item.case_sys_id" ng-click="c.openCase(item)"
+                >{{item.case_number}}</a
                 >
                 <span class="font-semibold" ng-if="!item.case_sys_id">{{item.case_number}}</span>
               </div>

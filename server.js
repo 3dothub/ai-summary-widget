@@ -1,24 +1,32 @@
 (function() {
-    var record = options.data || {};
 
-    var pick = function(source, keys) {
-        for (var i = 0; i < keys.length; i++) {
-            var value = source[keys[i]];
-            if (value !== undefined && value !== null && String(value).trim() !== "") {
-                return String(value).trim();
+    data.config = JSON.parse(gs.getProperty("x_fobr_boss_om.ai_summary_panel_property", "{}"));
+	data.user = gs.getUserDisplayName();
+
+    var onHoldFlags = {};
+    try {
+        onHoldFlags = JSON.parse(gs.getProperty("x_fobr_agent_desk.customer_order_onhold_status_messages", "{}"));
+        if (onHoldFlags && typeof onHoldFlags === "object" && !Array.isArray(onHoldFlags)) {
+            for (var key in onHoldFlags) {
+                if (!Object.prototype.hasOwnProperty.call(onHoldFlags, key)) continue;
+                var flag = onHoldFlags[key];
+                if (flag && flag.message) {
+                    data.config.onHoldFlags.push({key: key, label: flag.message});
+                }
             }
         }
-        return "";
-    };
+    } catch (configError) {
+        gs.error("AI Summary on-hold configuration error: " + configError.message);
+    }
 
     data.order_id =(input && input.order_id) ||
         options.order_id ||
         $sp.getParameter("order_id") ||
         $sp.getParameter("number") ||
-        pick(record, ["Order ID", "order_id", "u_order_id", "Number", "number", "order_number", "u_order_number", "External Order ID", "external_id", "u_external_id"]);
-    data.sys_id = (input && input.sys_id) || options.sys_id || $sp.getParameter("sys_id") || pick(record, ["sys_id", "sysId", "u_sys_id"]);
-    data.tabUniqueId = options.tabUniqueId;
-    data.tabContainerId = options.tabContainerId;
+        "";
+    data.sys_id = (input && input.sys_id) || options.sys_id || $sp.getParameter("sys_id") || "";
+    data.tabUniqueId = (input && input.tabUniqueId) || options.tabUniqueId;
+    data.tabContainerId = (input && input.tabContainerId) || options.tabContainerId;
 
     if (!input || input.action !== "summary") {
         return;
@@ -27,9 +35,13 @@
     data.apiFailed = false;
     data.errorMessage = "";
     try {
-        var request = new sn_ws.RESTMessageV2("x_fobr_boss_om.BOSS OM API", "GET - AI Summary");
+        if (!data.order_id) {
+            throw new Error("Missing order_id");
+        }
+        var request = new sn_ws.RESTMessageV2(data.config.restMessage, data.config.restMethod);
         var payload = {
-            order_id: input.order_id || data.order_id
+            order_id: input.order_id || data.order_id,
+		    force_refresh: data.config.forceRefresh
         };
         var sysId = input.sys_id || data.sys_id;
         if (sysId) {
@@ -52,6 +64,24 @@
             throw new Error("AI Summary API returned no ui_order");
         }
         data.order = parsed.ui_order;
+        data.order.configuredOnHoldReason = "";
+        var scenario = data.order.scenario || {};
+        for (var f = 0; f < data.config.onHoldFlags.length; f++) {
+            var configuredFlag = data.config.onHoldFlags[f];
+            var acceptedValues = onHoldFlags[configuredFlag.key].values;
+            if (!Array.isArray(acceptedValues)) continue;
+            var value = data.order[configuredFlag.key] !== undefined ? data.order[configuredFlag.key] : scenario[configuredFlag.key];
+            if (value === undefined || value === null) continue;
+            var normalizedValue = String(value).trim().toLowerCase();
+            for (var v = 0; v < acceptedValues.length; v++) {
+                if (acceptedValues[v] !== undefined && acceptedValues[v] !== null &&
+                    normalizedValue === String(acceptedValues[v]).trim().toLowerCase()) {
+                    data.order.configuredOnHoldReason = configuredFlag.label;
+                    break;
+                }
+            }
+            if (data.order.configuredOnHoldReason) break;
+        }
     } catch (apiError) {
         gs.error("AI Summary API error: " + apiError.message);
         data.order = null;

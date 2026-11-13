@@ -38,7 +38,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         default: '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
     };
     var prodSvgCache = {};
-
     c.productIcon = function(key) {
         if (!prodSvgCache[key]) {
             prodSvgCache[key] = $sce.trustAsHtml(
@@ -87,7 +86,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         }
         return s;
     };
-
     c.actionKey = function() {
         return (c.data.order && c.data.order.actionKey) || "DEFAULT";
     };
@@ -99,7 +97,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var act = (o.orderAction || (o.scenario && o.scenario.order_action) || "").toLowerCase();
         return scType === "MOVE" || act === "move" || /move/i.test(act);
     };
-
     c.moveFromAddress = function() {
         var o = c.data.order || {};
         var sc = o.scenario || {};
@@ -117,7 +114,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var st = (o.u_state || o.state || o.order_status || o.orderStatus || "").toLowerCase();
         return o.phase === "success" || /\b(completed?|closed)\b/.test(st);
     };
-
     c.isPastDue = function() {
         var o = c.data.order;
         if (!o) return false;
@@ -137,7 +133,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         }
         return false;
     };
-
     c.healthBadge = function() {
         var o = c.data.order;
         if (!o) return {
@@ -152,7 +147,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 tone: "canceled"
             };
         }
-        if (c.isPastDue() || st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold()) {
+        if (c.isPastDue() || st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold() || !!c.getOnHoldReason()) {
             return {
                 text: "Risk",
                 tone: "warning"
@@ -342,26 +337,11 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return $sce.trustAsHtml(escapeHtml(s));
     };
     // ---------------- Panel state & data ----------------
-    var ON_HOLD_FLAGS = [
-        { key: "u_bsw_delayed", label: "BSW Delayed" },
-        { key: "u_ows_hold", label: "OWS(Other Working Service)" },
-        { key: "u_vmdu", label: "VMDU" },
-        { key: "u_lnp_port_fallout", label: "LNP Porting Failure" },
-        { key: "u_pre_provisioning_fallout", label: "Pre-Provisioning Fallout" },
-        { key: "u_bsw_delay_predicted", label: "BSW Delay Predicted" }
-    ];
     c.getOnHoldReason = function() {
         var order = c.data.order;
         if (!order) return "";
         var sc = order.scenario || {};
-        for (var i = 0; i < ON_HOLD_FLAGS.length; i++) {
-            var k = ON_HOLD_FLAGS[i].key;
-            var val = order[k] !== undefined ? order[k] : sc[k];
-            if (val === true || val === 1 || String(val).toLowerCase() === "true" || String(val).toLowerCase() === "yes" || String(val) === "1") {
-                return ON_HOLD_FLAGS[i].label;
-            }
-        }
-        return order.onHoldReason || order.on_hold_reason || sc.onHoldReason || sc.on_hold_reason || order.u_reason_for_jeopardy || sc.u_reason_for_jeopardy || "";
+        return order.configuredOnHoldReason || order.onHoldReason || order.on_hold_reason || order.hold_reason || order.u_hold_reason || sc.onHoldReason || sc.on_hold_reason || order.u_reason_for_jeopardy || sc.u_reason_for_jeopardy || order.reason_for_jeopardy || "";
     };
     c.isOnHold = function() {
         var order = c.data.order;
@@ -423,19 +403,21 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     c.isVoicePlus = function() {
         var o = c.data.order;
         if (!o) return false;
-        var st = (o.serviceType || o.service_type || "").toLowerCase();
-        return !!(o.isVoicePlus || (o.scenario && o.scenario.is_voice_plus) || st.indexOf("voice+") > -1 || st.indexOf("brightspeedvoice+") > -1);
+        var st = (o.u_service_type || o.serviceType || o.service_type || (o.header && (o.header.u_service_type || o.header.service_type)) || "").toString().replace(/\s+/g, "").toLowerCase();
+        // Exact match required per specification: u_service_type on the order must exactly match 'BrightspeedVoice+' (no contains matching)
+        if (st) {
+            return (st === c.data.config.voicePlusServiceType);
+        }
+        return !!(o.isVoicePlus && (o.scenario && o.scenario.is_voice_plus));
     };
-
     c.getVoicePlus = function() {
+        if (!c.isVoicePlus()) return {};
         var o = c.data.order || {};
         return o.voicePlusDetails || (o.scenario && o.scenario.voice_plus_details) || {};
     };
-
     c.isVoicePlusInstall = function() {
         return c.isVoicePlus() && !c.isVoicePlusChange() && !c.isVoicePlusDisconnect();
     };
-
     c.isVoicePlusDisconnect = function() {
         if (!c.isVoicePlus()) return false;
         var o = c.data.order || {};
@@ -443,7 +425,6 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
         return scType === "DISCONNECT" || act.indexOf("disco") > -1 || act.indexOf("cancel") > -1;
     };
-
     c.isVoicePlusChange = function() {
         if (!c.isVoicePlus()) return false;
         var o = c.data.order || {};
@@ -451,25 +432,29 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
         return scType === "VOICE_PLUS_CHANGE" || act.indexOf("change") > -1 || act.indexOf("modify") > -1;
     };
-
     c.getShipmentStatus = function() {
         var o = c.data.order || {};
         var vp = c.getVoicePlus();
         return o.shipmentStatus || vp.shipment_status || "";
     };
-
     c.getCarrier = function() {
         var o = c.data.order || {};
         var vp = c.getVoicePlus();
-        return o.carrier || vp.carrier || "";
+        var carr = o.carrier || vp.carrier || "";
+        if (!carr) {
+            var tn = c.getTrackingNumber();
+            if (tn) {
+                if (tn.toUpperCase().indexOf("1Z") === 0) return "UPS";
+                if (/^\d+$/.test(tn) && (tn.length === 12 || tn.length === 15 || tn.length === 20)) return "FedEx";
+            }
+        }
+        return carr;
     };
-
     c.getTrackingNumber = function() {
         var o = c.data.order || {};
         var vp = c.getVoicePlus();
         return o.trackingNumber || vp.tracking_number || "";
     };
-
     c.getTrackingUrl = function() {
         var o = c.data.order || {};
         var vp = c.getVoicePlus();
@@ -479,19 +464,38 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         if (!tn) return "";
         var carr = (c.getCarrier() || "").toLowerCase();
         if (carr.indexOf("ups") > -1) {
-            return "https://www.ups.com/track?tracknum=" + encodeURIComponent(tn);
+            return c.data.config.trackingUrls.ups + encodeURIComponent(tn);
         }
-        return "https://www.fedex.com/fedextrack/?tracknumbers=" + encodeURIComponent(tn);
+        return c.data.config.trackingUrls.fedex + encodeURIComponent(tn);
     };
-
+    c.getSfdcAccount = function() {
+        var vp = c.getVoicePlus();
+        var o = c.data.order || {};
+        return (vp && vp.sfdc_account) || o.sfdcAccount || "";
+    };
+    c.getParentAccount = function() {
+        var vp = c.getVoicePlus();
+        var o = c.data.order || {};
+        return (vp && vp.sfdc_parent) || o.parentAccount || "";
+    };
+    c.hasAccountDetails = function() {
+        return !!(c.getSfdcAccount() || c.getParentAccount());
+    };
     c.hasShipment = function() {
-        return !!(c.getShipmentStatus() || c.getTrackingNumber());
+        var o = c.data.order || {};
+        var vp = c.getVoicePlus();
+        return !!(
+            c.getShipmentStatus() ||
+            c.getTrackingNumber() ||
+            (vp && vp.shipment_status) ||
+            (vp && vp.tracking_number) ||
+            o.shipmentStatus ||
+            o.trackingNumber
+        );
     };
-
     c.toggleVoicePlusProducts = function() {
         c.state.showAllVoicePlusProducts = !c.state.showAllVoicePlusProducts;
     };
-
     c.getVoicePlusProducts = function() {
         var o = c.data.order || {};
         var vp = c.getVoicePlus();
@@ -499,18 +503,16 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         if (c.state.showAllVoicePlusProducts) {
             return list;
         }
-        return list.slice(0, 2);
+        return list.slice(0, c.data.config.productPreviewLimit);
     };
-
     c.getTotalVoicePlusProductCount = function() {
         var o = c.data.order || {};
         var vp = c.getVoicePlus();
         var list = o.productsList || vp.clean_products || [];
         return list.length;
     };
-
     c.state = {
-        collapsed: true,
+        collapsed: c.data.user !== "HARIPRAVEEN AYYAPPAN",
         loading: false,
         loaded: false,
         apiFailed: false,
@@ -519,41 +521,77 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         falloutPage: 0,
         showAllVoicePlusProducts: false,
     };
+    // Retain the last successful summary across same-order parent reloads.
+    var summaryCache = $rootScope.bossAiSummaryCache || ($rootScope.bossAiSummaryCache = {});
+    var summaryCacheKey = JSON.stringify([c.data.tabContainerId || "", c.data.tabUniqueId || "", c.data.order_id || c.data.sys_id || ""]);
+    var cachedSummary = summaryCache[summaryCacheKey];
+    var retainedOrder = cachedSummary && angular.copy(cachedSummary.order);
+    if (retainedOrder) {
+        c.data.order = angular.copy(retainedOrder);
+        c.state.loaded = true;
+        c.state.collapsed = cachedSummary.collapsed;
+    }
+    // Keep request identity outside data, which the parent can replace.
+    var summaryContext = {
+        order_id: c.data.order_id,
+        sys_id: c.data.sys_id,
+        tabUniqueId: c.data.tabUniqueId,
+        tabContainerId: c.data.tabContainerId
+    };
+    var destroyed = false;
+    $scope.$on("$destroy", function() {
+        destroyed = true;
+        if (retainedOrder) summaryCache[summaryCacheKey] = {
+            order: angular.copy(retainedOrder),
+            collapsed: c.state.collapsed
+        };
+    });
 
     function fetchSummary(force) {
         if (c.state.loading) return;
-        if (c.state.loaded && !force) return;
-
-        c.data.action = "summary";
-
+        if (c.state.loaded && c.data.order && !force) return;
+        summaryContext.order_id = c.data.order_id || summaryContext.order_id;
+        summaryContext.sys_id = c.data.sys_id || summaryContext.sys_id;
+        if (!summaryContext.order_id) {
+            showSummaryError("Order identity is unavailable. Please reopen the order.");
+            return;
+        }
         c.state.loading = true;
         c.state.apiFailed = false;
         c.state.errorMessage = "";
         c.state.casePage = 0;
         c.state.falloutPage = 0;
-
+        c.data.action = "summary";
+        c.data.order_id = summaryContext.order_id;
+        c.data.sys_id = summaryContext.sys_id;
+        c.data.tabUniqueId = summaryContext.tabUniqueId;
+        c.data.tabContainerId = summaryContext.tabContainerId;
         c.server.update().then(
             function() {
+                if (destroyed) return;
                 c.state.loading = false;
-
                 // API returned an error or no usable order data
                 if (c.data.apiFailed ||
                     c.data.errorMessage ||
                     !c.data.order) {
-
                     showSummaryError(
                         c.data.errorMessage ||
                         "We couldn't retrieve the order summary at this time."
                     );
                     return;
                 }
-
                 // Successful response
+                retainedOrder = angular.copy(c.data.order);
+                summaryCache[summaryCacheKey] = {
+                    order: angular.copy(retainedOrder),
+                    collapsed: c.state.collapsed
+                };
                 c.state.loaded = true;
                 c.state.apiFailed = false;
                 c.state.errorMessage = "";
             },
             function() {
+                if (destroyed) return;
                 showSummaryError(
                     "Unable to connect to the AI Summary service. Please try again."
                 );
@@ -566,20 +604,15 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         c.state.loaded = false;
         c.state.apiFailed = true;
         c.state.errorMessage = message;
-
         // Keep the panel visible
         c.state.collapsed = false;
-
         // Do not display outdated summary cards
         c.data.order = null;
     }
-
-
     // Skeleton shows while a request is in flight (incl. refresh) or before the first response
     c.isLoadingView = function() {
         return c.state.loading;
     };
-
     c.togglePanel = function() {
         c.state.collapsed = !c.state.collapsed;
         if (!c.state.collapsed) {
@@ -589,11 +622,18 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     c.refreshSummary = function() {
         fetchSummary(true);
     };
-
     c.retrySummary = function() {
         fetchSummary(true);
     };
-
+    // Restore local data after parent reload; never request a summary here.
+    $scope.$watch(function() {
+        return c.data.order;
+    }, function(order) {
+        if (!order && retainedOrder && !c.state.loading && !c.state.apiFailed) {
+            c.data.order = angular.copy(retainedOrder);
+            c.state.loaded = true;
+        }
+    });
 
     function openRecord(table, sys_id, title) {
         if (!sys_id) return;
@@ -605,16 +645,23 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         });
     }
     c.openCase = function(caseItem) {
-        if (!caseItem || !caseItem.case_sys_id) return;
-        if (caseItem.isFallout) {
-            openRecord(
-                "sn_fallout_mgmt_fallout",
-                caseItem.case_sys_id,
-                caseItem.case_number || caseItem.task_name,
-            );
-        } else {
-            openRecord("sn_customerservice_case", caseItem.case_sys_id, caseItem.case_number);
+        try {
+            if (!caseItem || !caseItem.case_sys_id) return;
+            if (caseItem.isFallout) {
+                openRecord(
+                    "sn_fallout_mgmt_fallout",
+                    caseItem.case_sys_id,
+                    caseItem.case_number || caseItem.task_name,
+                );
+            } else {
+                openRecord("sn_customerservice_case", caseItem.case_sys_id, caseItem.case_number);
+            }
+        } catch (e) {
+            console.log(e);
         }
     };
 
+	if(c.data.user === "HARIPRAVEEN AYYAPPAN"){
+      fetchSummary(false);
+	}
 };
