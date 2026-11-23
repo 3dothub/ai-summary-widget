@@ -332,8 +332,14 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
     };
     // Status chip text for actions that need no manual work
+    c.needsReview = function() {
+        var acts = (c.data.order && c.data.order.criticalNextActions) || [];
+        return acts.some(function(a) {
+            return a && a.action_required;
+        });
+    };
     c.nextActionHeading = function() {
-        if (c.isCompleted()) return "Order Fulfillment Status";
+        if (c.isCompleted() && !c.needsReview()) return "Order Fulfillment Status";
         var o = c.data.order || {};
         var acts = o.criticalNextActions || [];
         var anyRequired = acts.some(function(a) {

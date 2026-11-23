@@ -470,7 +470,7 @@
           </div>
         </div>
         <!-- RESTORED: Completed orders fulfillment card -->
-        <div class="aisw-card-section aisw-completed-fulfillment" ng-if="c.isCompleted()">
+        <div class="aisw-card-section aisw-completed-fulfillment" ng-if="c.isCompleted() && !c.needsReview()">
           <div class="aisw-section-header-row">
             <h5 class="aisw-section-heading">Order Fulfillment Status</h5>
             <span class="aisw-directive-pill aisw-completed-pill">Completed &middot; Closed</span>
@@ -490,7 +490,7 @@
         <!-- ================= 5. Next Actions ================= -->
         <div
                 class="aisw-card-section"
-                ng-if="!c.isCompleted() && c.data.order.criticalNextActions && c.data.order.criticalNextActions.length > 0"
+                ng-if="(!c.isCompleted() || c.needsReview()) && c.data.order.criticalNextActions && c.data.order.criticalNextActions.length > 0"
         >
           <div class="aisw-section-header-row">
             <h5 class="aisw-section-heading">{{ c.nextActionHeading() }}</h5>
