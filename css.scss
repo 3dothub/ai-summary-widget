@@ -1851,6 +1851,9 @@ Scoped to .aisw-tiles-single so the shared :only-child sizing stays as is. */
 }
 
 .ai-summary-widget .aisw-scenario-card .aisw-tiles-row > .aisw-tile .aisw-tile-lines.aisw-tile-stacked {
+  display: flex !important;
+  flex-direction: column !important;
+  grid-template-columns: none !important;
   gap: 8px !important;
   .aisw-tile-line {
     display: flex !important;
@@ -2944,4 +2947,259 @@ Scoped to .aisw-tiles-single so the shared :only-child sizing stays as is. */
   font-weight: 600 !important;
   line-height: 1.2 !important;
   letter-spacing: normal !important;
+}
+
+/* ==========================================================================
+   RECORD ONLY PARAMETER UPDATES PANEL
+   ========================================================================== */
+.ai-summary-widget .aisw-record-changes-panel {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 13px 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  .aisw-rc-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 11px;
+    border-bottom: 1px solid #f1f5f9;
+
+    .aisw-rc-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+
+      .aisw-rc-icon {
+        font-size: 14px;
+        color: #0284c7;
+      }
+
+      .aisw-rc-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.01em;
+      }
+    }
+
+    .aisw-rc-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 12px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #dbeafe;
+
+      &.aisw-rc-badge-neutral {
+        background: #f8fafc;
+        color: #64748b;
+        border-color: #e2e8f0;
+      }
+    }
+  }
+
+  .aisw-rc-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .aisw-rc-item-card {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 9px 10px;
+
+    .aisw-rc-item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+
+      .aisw-rc-item-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #1e293b;
+
+        .aisw-rc-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          background: #0284c7;
+          display: inline-block;
+          flex-shrink: 0;
+        }
+      }
+
+      .aisw-rc-type-tag {
+        font-size: 9.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        padding: 2px 6px;
+        border-radius: 4px;
+
+        &.aisw-rc-type-updated {
+          background: #eff6ff;
+          color: #2563eb;
+          border: 1px solid #bfdbfe;
+        }
+        &.aisw-rc-type-added {
+          background: #f0fdf4;
+          color: #16a34a;
+          border: 1px solid #bbf7d0;
+        }
+        &.aisw-rc-type-cleared {
+          background: #fff1f2;
+          color: #e11d48;
+          border: 1px solid #fecdd3;
+        }
+      }
+    }
+
+    .aisw-rc-compare-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+
+      .aisw-rc-box {
+        flex: 1;
+        min-width: 0;
+        border-radius: 6px;
+        padding: 6px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        .aisw-rc-box-label {
+          font-size: 9px;
+          font-weight: 700;
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        .aisw-rc-box-val {
+          font-size: 11px;
+          font-weight: 600;
+          line-height: 1.35;
+          word-break: break-word;
+          overflow-wrap: break-word;
+
+          .aisw-rc-empty {
+            font-style: italic;
+            font-weight: 400;
+            color: #94a3b8;
+          }
+        }
+
+        &.aisw-rc-box-prev {
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          .aisw-rc-box-label {
+            color: #64748b;
+          }
+          .aisw-rc-box-val {
+            color: #475569;
+          }
+        }
+
+        &.aisw-rc-box-new {
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
+          .aisw-rc-box-label {
+            color: #059669;
+          }
+          .aisw-rc-box-val {
+            color: #047857;
+            font-weight: 700;
+          }
+        }
+      }
+
+      .aisw-rc-arrow-wrap {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        .aisw-rc-arrow-circle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: #e2e8f0;
+          color: #475569;
+          font-size: 10px;
+          font-weight: 800;
+        }
+      }
+    }
+  }
+
+  .aisw-rc-baseline-note {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #e2e8f0;
+    font-size: 11px;
+    color: #64748b;
+    text-align: right;
+
+    strong {
+      color: #1e293b;
+    }
+  }
+
+  .aisw-rc-empty-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 15px;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+
+    .aisw-rc-empty-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #22c55e;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    .aisw-rc-empty-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .aisw-rc-empty-title {
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #166534;
+      }
+
+      .aisw-rc-empty-desc {
+        font-size: 11px;
+        color: #15803d;
+      }
+    }
+  }
 }

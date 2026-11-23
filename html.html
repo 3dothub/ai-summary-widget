@@ -225,7 +225,71 @@
               </div>
             </div>
           </div>
-          <div class="aisw-tiles-row" ng-if="c.data.order.cards && !c.isVoicePlus()" ng-class="{'aisw-tiles-single': c.data.order.cards.single}" data-case="{{c.data.order.cards.caseId}}">
+                    <!-- Record Only Parameter Changes Section -->
+          <div class="aisw-record-changes-panel" ng-if="c.isRecordOnly()">
+            <div class="aisw-rc-header">
+              <div class="aisw-rc-title-wrap">
+                <span class="aisw-rc-icon">&#9998;</span>
+                <span class="aisw-rc-title">Updated Parameters</span>
+              </div>
+              <span class="aisw-rc-badge" ng-if="c.hasRecordChanges()">
+                {{c.getRecordChanges().length}} Change{{c.getRecordChanges().length > 1 ? 's' : ''}} Detected
+              </span>
+              <span class="aisw-rc-badge aisw-rc-badge-neutral" ng-if="!c.hasRecordChanges()">
+                No Changes
+              </span>
+            </div>
+
+            <!-- When attributes have changed -->
+            <div class="aisw-rc-cards-list" ng-if="c.hasRecordChanges()">
+              <div class="aisw-rc-item-card" ng-repeat="change in c.getRecordChanges() track by $index">
+                <div class="aisw-rc-item-header">
+                  <div class="aisw-rc-item-name">
+                    <span class="aisw-rc-dot"></span>
+                    <span>{{change.label || change.field}}</span>
+                  </div>
+                  <span class="aisw-rc-type-tag aisw-rc-type-added" ng-if="!change.from && !change.existing_value">Added</span>
+                  <span class="aisw-rc-type-tag aisw-rc-type-cleared" ng-if="!change.to && !change.requested_value">Cleared</span>
+                  <span class="aisw-rc-type-tag aisw-rc-type-updated" ng-if="(change.from || change.existing_value) && (change.to || change.requested_value)">Updated</span>
+                </div>
+                <div class="aisw-rc-compare-row">
+                  <div class="aisw-rc-box aisw-rc-box-prev">
+                    <div class="aisw-rc-box-label">PREVIOUS</div>
+                    <div class="aisw-rc-box-val">
+                      <span ng-if="change.from || change.existing_value">{{change.from || change.existing_value}}</span>
+                      <span class="aisw-rc-empty" ng-if="!change.from && !change.existing_value">&mdash; (Blank)</span>
+                    </div>
+                  </div>
+                  <div class="aisw-rc-arrow-wrap" aria-hidden="true">
+                    <span class="aisw-rc-arrow-circle">&rarr;</span>
+                  </div>
+                  <div class="aisw-rc-box aisw-rc-box-new">
+                    <div class="aisw-rc-box-label">NEW VALUE</div>
+                    <div class="aisw-rc-box-val">
+                      <span ng-if="change.to || change.requested_value">{{change.to || change.requested_value}}</span>
+                      <span class="aisw-rc-empty" ng-if="!change.to && !change.requested_value">&mdash; (Cleared)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="aisw-rc-baseline-note" ng-if="c.getPriorOrderId()">
+                Compared against active baseline order <strong>{{c.getPriorOrderId()}}</strong>
+              </div>
+            </div>
+
+            <!-- When no attributes have changed -->
+            <div class="aisw-rc-empty-card" ng-if="!c.hasRecordChanges()">
+              <div class="aisw-rc-empty-icon">&#10003;</div>
+              <div class="aisw-rc-empty-text">
+                <div class="aisw-rc-empty-title">All Parameters Match Previous Order</div>
+                <div class="aisw-rc-empty-desc">
+                  No modified attributes detected compared to the active baseline order<span ng-if="c.getPriorOrderId()"> ({{c.getPriorOrderId()}})</span>.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="aisw-tiles-row" ng-if="c.data.order.cards && !c.isVoicePlus() && !c.isRecordOnly()" ng-class="{'aisw-tiles-single': c.data.order.cards.single}" data-case="{{c.data.order.cards.caseId}}">
             <div ng-repeat-start="t in c.data.order.cards.tiles track by $index"
                  class="aisw-tile" ng-class="'tile-' + t.tone">
               <span class="aisw-tile-label">{{t.label}}</span>

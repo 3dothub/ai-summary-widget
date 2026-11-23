@@ -1,5 +1,41 @@
 api.controller = function($scope, spUtil, $rootScope, $sce) {
     var c = this;
+
+	    var aiTracking = c.data.aiSummaryTracking;
+    var trackedTabs = $rootScope.bossAiTrackedTabs || ($rootScope.bossAiTrackedTabs = {});
+    var trackingDateFormatter;
+    var widgetUpdate;
+    var trackAfterUpdate = false;
+
+    function buildSummaryOpenRequest() {
+        if (!aiTracking) return;
+        var state = trackedTabs[aiTracking.token] || (trackedTabs[aiTracking.token] = {});
+        if (state.pending) return;
+        var day = '';
+        try {
+            trackingDateFormatter = trackingDateFormatter || new Intl.DateTimeFormat('sv-SE', {
+                timeZone: aiTracking.timezone,
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            });
+            day = trackingDateFormatter.format(new Date());
+        } catch (error) {
+            return;
+        }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || state.day === day) return;
+        return {
+            state: state,
+            request: {
+                order: aiTracking.order,
+                container: aiTracking.container,
+                tab: aiTracking.tab,
+                token: aiTracking.token,
+                day: day
+            }
+        };
+    }
+	
     // ---------------- General UI Icons ----------------
     var ICON_PATHS = {
         sparkles: '<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/><path d="M5 15l.6 1.4L7 17l-1.4.6L5 19l-.6-1.4L3 17l1.4-.6z"/>',
@@ -400,6 +436,40 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return cd[key] || "";
     };
     // ---------------- Brightspeed Voice+ Helpers ----------------
+    
+    c.isRecordOnly = function() {
+        var o = c.data.order;
+        if (!o) return false;
+        var scType = (o.scenarioType || (o.scenario && o.scenario.scenario_type) || "").toUpperCase();
+        var num = (o.orderNo || o.orderNumber || o.number || "").toUpperCase();
+        var act = (o.orderAction || (o.scenario && o.scenario.order_action) || "").toLowerCase();
+        var st = (o.serviceType || (o.scenario && o.scenario.service_type) || "");
+        return scType === "RECORD_ONLY" || o.isRecordOnly === true || (num.indexOf("RO") === 0 && act === "change" && !st);
+    };
+    c.getRecordChanges = function() {
+        var o = c.data.order;
+        if (!o) return [];
+        var changes = o.recordChanges || (o.scenario && o.scenario.record_changes) || [];
+        return changes.filter(function(item) {
+            return item && item.changed !== false;
+        });
+    };
+    c.hasRecordChanges = function() {
+        return c.getRecordChanges().length > 0;
+    };
+    c.getPriorOrderId = function() {
+        var o = c.data.order;
+        if (!o) return "";
+        var changes = o.recordChanges || (o.scenario && o.scenario.record_changes) || [];
+        for (var i = 0; i < changes.length; i++) {
+            if (changes[i].previous_order_id) return changes[i].previous_order_id;
+            if (changes[i].prior_order_id) return changes[i].prior_order_id;
+        }
+        var comp = (o.historicalComparison || (o.scenario && o.scenario.historical_comparison));
+        if (comp && comp.previous_order_id) return comp.previous_order_id;
+        return "";
+    };
+
     c.isVoicePlus = function() {
         var o = c.data.order;
         if (!o) return false;
@@ -512,7 +582,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         return list.length;
     };
     c.state = {
-        collapsed: c.data.user !== "HARIPRAVEEN AYYAPPAN",
+        collapsed: true,
         loading: false,
         loaded: false,
         apiFailed: false,
@@ -547,28 +617,50 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
     });
 
-    function fetchSummary(force) {
-        if (c.state.loading) return;
-        if (c.state.loaded && c.data.order && !force) return;
-        summaryContext.order_id = c.data.order_id || summaryContext.order_id;
-        summaryContext.sys_id = c.data.sys_id || summaryContext.sys_id;
-        if (!summaryContext.order_id) {
-            showSummaryError("Order identity is unavailable. Please reopen the order.");
-            return;
+    function fetchSummary(force, trackOpen) {
+        if (destroyed) return;
+        if (widgetUpdate) {
+            if (trackOpen) trackAfterUpdate = true;
+            if (force && !c.state.loading) {
+                return widgetUpdate.then(function() {
+                    return fetchSummary(true);
+                });
+            }
+            return widgetUpdate;
         }
-        c.state.loading = true;
-        c.state.apiFailed = false;
-        c.state.errorMessage = "";
-        c.state.casePage = 0;
-        c.state.falloutPage = 0;
-        c.data.action = "summary";
-        c.data.order_id = summaryContext.order_id;
-        c.data.sys_id = summaryContext.sys_id;
-        c.data.tabUniqueId = summaryContext.tabUniqueId;
-        c.data.tabContainerId = summaryContext.tabContainerId;
-        c.server.update().then(
+
+        var shouldFetch = force || !c.state.loaded || !c.data.order;
+        var tracking = trackOpen && buildSummaryOpenRequest();
+        if (!shouldFetch && !tracking) return;
+
+        if (shouldFetch) {
+            summaryContext.order_id = c.data.order_id || summaryContext.order_id;
+            summaryContext.sys_id = c.data.sys_id || summaryContext.sys_id;
+            if (!summaryContext.order_id) {
+                showSummaryError("Order identity is unavailable. Please reopen the order.");
+                return;
+            }
+            c.state.loading = true;
+            c.state.apiFailed = false;
+            c.state.errorMessage = "";
+            c.state.casePage = 0;
+            c.state.falloutPage = 0;
+            c.data.force_refresh = !!force;
+            c.data.order_id = summaryContext.order_id;
+            c.data.sys_id = summaryContext.sys_id;
+            c.data.tabUniqueId = summaryContext.tabUniqueId;
+            c.data.tabContainerId = summaryContext.tabContainerId;
+        }
+
+        c.data.action = shouldFetch ? "summary" : "track_ai_summary_open";
+        if (tracking) {
+            tracking.state.pending = true;
+            c.data.aiSummaryOpenRequest = tracking.request;
+        }
+        widgetUpdate = c.server.update().then(
             function() {
-                if (destroyed) return;
+                if (tracking && c.data.trackedDay) tracking.state.day = c.data.trackedDay;
+                if (destroyed || !shouldFetch) return;
                 c.state.loading = false;
                 // API returned an error or no usable order data
                 if (c.data.apiFailed ||
@@ -591,12 +683,25 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 c.state.errorMessage = "";
             },
             function() {
-                if (destroyed) return;
+                if (destroyed || !shouldFetch) return;
                 showSummaryError(
                     "Unable to connect to the AI Summary service. Please try again."
                 );
             }
-        );
+        ).finally(function() {
+            if (tracking) tracking.state.pending = false;
+            delete c.data.aiSummaryOpenRequest;
+            delete c.data.trackedDay;
+            widgetUpdate = null;
+            if (trackAfterUpdate) {
+                trackAfterUpdate = false;
+                if (!destroyed && !c.state.collapsed &&
+                    (!tracking || tracking.state.day)) {
+                    fetchSummary(false, true);
+                }
+            }
+        });
+        return widgetUpdate;
     }
 
     function showSummaryError(message) {
@@ -616,7 +721,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     c.togglePanel = function() {
         c.state.collapsed = !c.state.collapsed;
         if (!c.state.collapsed) {
-            fetchSummary(false);
+            fetchSummary(false, true);
         }
     };
     c.refreshSummary = function() {
@@ -660,8 +765,5 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
             console.log(e);
         }
     };
-
-	if(c.data.user === "HARIPRAVEEN AYYAPPAN"){
-      fetchSummary(false);
-	}
 };
+

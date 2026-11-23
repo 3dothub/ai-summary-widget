@@ -1,7 +1,128 @@
 (function() {
 
+
+    if (input && (input.aiSummaryOpenRequest || input.action === 'track_ai_summary_open')) {
+        var trackingOnly = input.action !== 'summary';
+        if (trackingOnly && input.aiSummaryOpenRequest) {
+            Object.keys(input).forEach(function (key) {
+                if (key !== 'aiSummaryOpenRequest' && key !== 'trackedDay' && key !== '__proto__' &&
+                    key !== 'constructor' && key !== 'prototype') data[key] = input[key];
+            });
+        }
+        try {
+            data.trackedDay = queueAiSummaryOpen(input.aiSummaryOpenRequest || input);
+        } catch (error) {
+            gs.warn('BOSS OM AI Summary interaction tracking failed');
+        }
+        if (trackingOnly) return;
+    }
+
+    data.tabUniqueId = options && options.tabUniqueId || input && input.tabContainerId || Math.floor(Math.random() * 9000000000) + 1000000000;
+    data.tabContainerId = options && options.tabContainerId || input && input.tabContainerId || Math.floor(Math.random() * 9000000000) + 1000000000;
+
+    if (!input) initializeSummaryTracking();
+
+    function initializeSummaryTracking() {
+        try {
+            var trackingOrder = findTrackingOrder(options.sys_id, options.order_id);
+            if (!trackingOrder) return;
+            var orderId = String(trackingOrder.getUniqueValue());
+            var key = trackingTabKey(orderId, data.tabContainerId, data.tabUniqueId);
+            var session = gs.getSession();
+            var token = session.getClientData(key);
+            if (!token) {
+                token = String(gs.generateGUID());
+                session.putClientData(key, token);
+            }
+            data.aiSummaryTracking = {
+                order: orderId,
+                container: String(data.tabContainerId),
+                tab: String(data.tabUniqueId),
+                token: String(token),
+                timezone: trackingTimezone()
+            };
+        } catch (error) {
+            gs.warn('BOSS OM AI Summary tracking could not initialize');
+        }
+    }
+
+    function trackingDigest(parts) {
+        return String(new GlideDigest().getSHA256Hex(JSON.stringify(parts)));
+    }
+
+    function trackingTabKey(orderId, container, tab) {
+        return 'boss_ai_' + trackingDigest([String(gs.getUserID()), String(orderId), String(container), String(tab)]);
+    }
+
+    function trackingTimezone() {
+        return gs.getProperty('glide.sys.default.tz', 'UTC') || 'UTC';
+    }
+
+    function trackingDay(now) {
+        return String(now.getLocalDate().getValue());
+    }
+
+    function findTrackingOrder(sysId, number) {
+        if (!gs.getSession().isLoggedIn() || !gs.getSession().isInteractive()) return null;
+		
+        var order = new GlideRecordSecure(x_fobr_agent_desk.BOSSConstants.TABLE.CUSTOMER_ORDER);
+        if (/^[a-f0-9]{32}$/.test(String(sysId || ''))) return order.get(sysId) ? order : null;
+        if (typeof number !== 'string' || !number || number.length > 100) return null;
+        order.addQuery('external_id', number);
+        order.setLimit(2);
+        order.query();
+        if (!order.next()) return null;
+        var id = order.getUniqueValue();
+        return !order.next() && order.get(id) ? order : null;
+    }
+
+    function authorizedTrackingBanField(order, field) {
+        var element = order.getElement(field);
+        if (!element || !element.canRead() || !order.getValue(field)) return '';
+        var reference = element.getRefRecord();
+        if (!reference || !reference.isValidRecord()) return '';
+        var readable = new GlideRecordSecure(reference.getTableName());
+        if (!readable.get(order.getValue(field)) || !readable.isValidField('sn_tmt_core_external_id')) return '';
+        var identifier = readable.getElement('sn_tmt_core_external_id');
+        return identifier && identifier.canRead() && identifier.getValue() ? field : '';
+    }
+
+    function queueAiSummaryOpen(request) {
+        if (typeof request.token !== 'string' || !/^[a-f0-9]{32}$/.test(request.token) ||
+            typeof request.container !== 'string' || !request.container || request.container.length > 200 ||
+            typeof request.tab !== 'string' || !request.tab || request.tab.length > 200 ||
+            typeof request.order !== 'string' || !/^[a-f0-9]{32}$/.test(request.order)) return '';
+
+        var session = gs.getSession();
+        var tabKey = trackingTabKey(request.order, request.container, request.tab);
+        if (session.getClientData(tabKey) !== request.token) return '';
+
+        var now = new GlideDateTime();
+        var day = trackingDay(now);
+        if (request.day && request.day !== day) return '';
+        var queuedDayKey = tabKey + '_queued';
+        if (session.getClientData(queuedDayKey) === day) return day;
+
+        var order = findTrackingOrder(request.order);
+        if (!order) return '';
+
+        var banField = authorizedTrackingBanField(order, 'contact') ||
+            authorizedTrackingBanField(order, 'account');
+        var context = {
+            user: String(gs.getUserID()),
+            order: request.order,
+            day: day,
+            timestamp: String(now.getValue()),
+            sessionHash: trackingDigest([request.token]).slice(0, 32),
+            banField: banField,
+            banReference: banField ? String(order.getValue(banField)) : ''
+        };
+        gs.eventQueue('x_fobr_boss_om.ai_summary_opened', order, JSON.stringify(context), '');
+        session.putClientData(queuedDayKey, day);
+        return day;
+    }
+
     data.config = JSON.parse(gs.getProperty("x_fobr_boss_om.ai_summary_panel_property", "{}"));
-	data.user = gs.getUserDisplayName();
 
     var onHoldFlags = {};
     try {
@@ -41,7 +162,7 @@
         var request = new sn_ws.RESTMessageV2(data.config.restMessage, data.config.restMethod);
         var payload = {
             order_id: input.order_id || data.order_id,
-		    force_refresh: data.config.forceRefresh
+		    force_refresh: !!(input.force_refresh || data.config.forceRefresh)
         };
         var sysId = input.sys_id || data.sys_id;
         if (sysId) {
@@ -63,7 +184,9 @@
         if (!parsed || !parsed.ui_order) {
             throw new Error("AI Summary API returned no ui_order");
         }
-        data.order = parsed.ui_order;
+        data.order = parsed.ui_order || {};
+        data.cacheHit = !!parsed.cache_hit;
+		data.order.on_hold_reason = data.order.on_hold_reason || parsed.summary_details && parsed.summary_details.on_hold_reason;
         data.order.configuredOnHoldReason = "";
         var scenario = data.order.scenario || {};
         for (var f = 0; f < data.config.onHoldFlags.length; f++) {
