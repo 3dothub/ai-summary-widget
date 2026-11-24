@@ -177,6 +177,12 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
         };
         var hs = (o.healthStatus || "").toLowerCase();
         var st = (o.u_state || o.state || o.order_status || o.orderStatus || "").toLowerCase();
+        if (/reject/.test(hs + " " + st)) {
+            return {
+                text: "Rejected",
+                tone: "danger"
+            };
+        }
         if (/cancel|void/.test(hs + " " + st)) {
             return {
                 text: o.u_state || o.state || "Canceled",
