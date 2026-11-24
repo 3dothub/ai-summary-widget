@@ -183,7 +183,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
                 tone: "canceled"
             };
         }
-        if (c.isPastDue() || st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold() || !!c.getOnHoldReason()) {
+        if (!c.isCompleted() && (c.isPastDue() || st.indexOf("hold") > -1 || hs === "risk" || c.isOnHold() || !!c.getOnHoldReason())) {
             return {
                 text: "Risk",
                 tone: "warning"
@@ -387,7 +387,7 @@ api.controller = function($scope, spUtil, $rootScope, $sce) {
     };
     c.isOnHold = function() {
         var order = c.data.order;
-        if (!order) return false;
+        if (!order || c.isCompleted()) return false;
         var st = (order.u_state || order.state || order.order_status || order.orderStatus || "").toLowerCase();
         return st.indexOf("hold") > -1 || !!c.getOnHoldReason();
     };
